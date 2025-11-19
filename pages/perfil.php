@@ -11,11 +11,6 @@ if(!isset($_SESSION['nome_usuario'])) {
 
 include('../php/conexao.php'); // Importante conectar
 
-if(!isset($_SESSION['nome_usuario'])) {
-    header("Location: login.php?erro=acesso_negado");
-    exit;
-}
-
 // Buscar a foto e a bio do usuário logado
 $id_usuario = $_SESSION['id'];
 $sql = "SELECT * FROM perfil WHERE id = $id_usuario";

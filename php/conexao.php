@@ -4,7 +4,7 @@
 // Configurações do USBWebServer
 $servidor = "localhost";
 $usuario = "root"; 
-$senha = "usbw"; // IMPORTANTE: O USBWebServer geralmente usa a senha "usbw"
+$senha = "usbw"; //senha "usbw"
 $banco = "iffed";
 
 // Tenta conectar
