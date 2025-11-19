@@ -1,4 +1,4 @@
-# IFFed - Rede Social Escolar
+# IFFed
 
 **Status:** Em desenvolvimento 🚧
 
