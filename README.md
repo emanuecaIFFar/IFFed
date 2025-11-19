@@ -126,7 +126,7 @@ Exemplos importantes:
 <img src="../assets_front/img/<?php echo $dados_usuario['foto']; ?>" alt="Foto de Perfil">
 ```
 
-## Boas práticas e próximos passos
+## ...
 
 - Trocar o armazenamento de senha para `password_hash()`.
 - Validar e sanitizar todos os inputs antes de inserir no banco.
@@ -135,7 +135,7 @@ Exemplos importantes:
 
 ## Contato
 
-Se quiser, posso ajudar a:
+Se quiser forkar:
 
 - Implementar upload seguro (`php/upload_foto_teste.php`) e integração com `pages/perfil.php`.
 - Migrar senhas para `password_hash()` e atualizar `validar_login.php`.
