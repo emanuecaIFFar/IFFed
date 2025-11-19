@@ -1,6 +1,6 @@
 # IFFed
 
-🚧
+🚧 (demo)
 
 ## Sobre o projeto
 
