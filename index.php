@@ -221,7 +221,7 @@
                 <a href="pages/login.php" class="btn btn-sm btn-entrar ms-auto">Entrar</a>
             </header> <main class="iffed-content-feed">
                 <h2>Bem-vindo ao IFFed!</h2>
-                <p>O conteúdo e os posts estão aqui.</p>
+                <p>Do corredor direto para a sua timeline.</p>
 
                 <div class="row">
 
