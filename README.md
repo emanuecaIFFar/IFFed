@@ -1,6 +1,6 @@
 # IFFed
 
-**Status:** Em desenvolvimento 🚧
+🚧
 
 ## Sobre o projeto
 
