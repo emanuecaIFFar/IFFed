@@ -9,6 +9,10 @@ session_start();
     <title>iffed - Página Inicial</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <!-- Tailwind (para estilos rápidos da nova sidebar) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide icons (usado pela nova sidebar) -->
+    <script src="https://unpkg.com/lucide@latest"></script>
     <style>
         body {
             margin: 0;
@@ -202,70 +206,98 @@ session_start();
             margin-right: 0;
         }
 
+        /* Styles adicionais para a nova sidebar (transição compacta/expandida) */
+        /* Utility para esconder/mostrar labels suavemente */
+        .sidebar-label {
+            opacity: 0;
+            display: none;
+            white-space: nowrap;
+            transition: opacity 0.2s ease-in-out;
+        }
+        .expanded .sidebar-label {
+            display: inline-block;
+            opacity: 1;
+        }
+
+        /* Ajustes de largura quando a sidebar é trocada */
+        #sidebar { width: 80px; }
+        #sidebar.expanded { width: 260px; }
+
+        /* Ajustes visuais do cabeçalho de boas-vindas */
+        .iffed-content-feed h1.display-4 {
+            /* Garante uma fonte limpa e sem serifa igual da imagem */
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            
+            font-size: 52px;    /* Levemente menor que 56px para ficar mais elegante */
+            line-height: 1.1;
+            font-weight: 300;   /* MUDANÇA PRINCIPAL: De 700 para 400 (Regular). Na foto a letra é fina. */
+            color: #ffffff;
+            margin: 0 0 5px 0; /* Um pouco mais de espaço embaixo */
+            letter-spacing: -0.5px; /* Aproxima levemente as letras para ficar moderno */
+        }
+
+        .iffed-content-feed p.lead {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            
+            font-size: 20px;    /* MUDANÇA: 14px é muito pequeno. Na foto o texto de apoio é maior. */
+            color: #e0e0e0;     /* Um cinza quase branco, mais claro que o #cfcfcf */
+            margin: 0 0 18px 0;
+            font-weight: 400;   /* Normal */
+        }
+
     </style>
 </head>
 <body>
     <div class="iffed-app-container">
 
-        <nav class="iffed-sidebar" id="iffedSidebar">
-            <ul class="nav nav-pills flex-column">
-                <li class="nav-item">
-                    <a class="nav-link active" href="index.php" aria-current="page" title="Página Inicial">
-                        <i class="bi bi-house-door-fill"></i>
-                        <span class="label">Página inicial</span>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="#" title="Pesquisar">
-                        <i class="bi bi-search"></i>
-                        <span class="label">Pesquisar</span>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="#" title="Criar Postagem">
-                        <i class="bi bi-plus-square"></i>
-                        <span class="label">Novo post</span>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="#" title="Notificações">
-                        <i class="bi bi-heart"></i>
-                        <span class="label">Notificações</span>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="#" title="Sugestões">
-                        <i class="bi bi-people"></i>
-                        <span class="label">Comunidades</span>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="pages/perfil.php" title="Perfil">
-                        <i class="bi bi-person-circle"></i>
-                        <span class="label">Perfil</span>
-                    </a>
-                </li>
-                <li class="nav-item iffed-logout-bottom">
-                    <a class="nav-link" href="pages/login.php" title="Sair">
-                        <i class="bi bi-box-arrow-right"></i>
-                        <span class="label">Sair</span>
-                    </a>
-                </li>
-                <li class="nav-item iffed-menu-bottom">
-                    <button class="nav-link" type="button" title="Menu" onclick="toggleSidebarMenu()" style="background:none;border:none;padding:0;">
-                        <i class="bi bi-list"></i>
-                    </button>
-                </li>
-            </ul>
+        <!-- Nova sidebar (substitui a antiga) -->
+        <nav id="sidebar" class="fixed top-0 left-0 h-full bg-black border-r border-[#262626] z-50 flex flex-col justify-between py-5 transition-all duration-300 ease-in-out">
+            <div class="flex flex-col w-full px-2 space-y-2">
+                <a href="index.php" class="flex items-center h-[60px] w-full rounded-lg transition-colors duration-200 text-white bg-[#202020] justify-center group nav-item" title="Página Inicial">
+                    <i data-lucide="home" class="w-7 h-7 stroke-[2]"></i>
+                    <span class="ml-4 text-lg font-medium sidebar-label">Página Inicial</span>
+                </a>
+                <a href="pages/pesquisar_nseifazerisso.html" class="flex items-center h-[60px] w-full rounded-lg transition-colors duration-200 text-[#a8a8a8] hover:bg-[#181818] hover:text-white justify-center group nav-item" title="Pesquisar">
+                    <i data-lucide="search" class="w-7 h-7 stroke-[2]"></i>
+                    <span class="ml-4 text-lg font-medium sidebar-label">Pesquisar</span>
+                </a>
+                <a href="criar_post" class="flex items-center h-[60px] w-full rounded-lg transition-colors duration-200 text-[#a8a8a8] hover:bg-[#181818] hover:text-white justify-center group nav-item" title="Novo Post">
+                    <i data-lucide="plus-square" class="w-7 h-7 stroke-[2]"></i>
+                    <span class="ml-4 text-lg font-medium sidebar-label">Novo Post</span>
+                </a>
+                <a href="pages/notificacoes.html" class="flex items-center h-[60px] w-full rounded-lg transition-colors duration-200 text-[#a8a8a8] hover:bg-[#181818] hover:text-white justify-center group nav-item" title="Notificações">
+                    <i data-lucide="heart" class="w-7 h-7 stroke-[2]"></i>
+                    <span class="ml-4 text-lg font-medium sidebar-label">Notificações</span>
+                </a>
+                <a href="pages/comunidades.hmtl" class="flex items-center h-[60px] w-full rounded-lg transition-colors duration-200 text-[#a8a8a8] hover:bg-[#181818] hover:text-white justify-center group nav-item" title="Comunidades">
+                    <i data-lucide="users" class="w-7 h-7 stroke-[2]"></i>
+                    <span class="ml-4 text-lg font-medium sidebar-label">Comunidades</span>
+                </a>
+                <a href="pages/perfil.php" class="flex items-center h-[60px] w-full rounded-lg transition-colors duration-200 text-[#a8a8a8] hover:bg-[#181818] hover:text-white justify-center group nav-item" title="Perfil">
+                    <i data-lucide="user-circle-2" class="w-7 h-7 stroke-[2.5]"></i>
+                    <span class="ml-4 text-lg font-medium sidebar-label">Perfil</span>
+                </a>
+            </div>
+
+            <div class="flex flex-col w-full px-2 space-y-2 mb-2">
+                <a href="php/sair.php" class="flex items-center h-[60px] w-full rounded-lg transition-colors duration-200 text-[#a8a8a8] hover:bg-[#181818] hover:text-white justify-center group nav-item" title="Sair">
+                    <i data-lucide="log-out" class="w-7 h-7 stroke-[2]"></i>
+                    <span class="ml-4 text-lg font-medium sidebar-label">Sair</span>
+                </a>
+
+                <button id="toggleBtn" class="flex items-center justify-center h-[60px] w-full rounded-lg transition-colors duration-200 text-[#a8a8a8] hover:bg-[#181818] hover:text-white outline-none">
+                    <i data-lucide="menu" class="w-7 h-7 stroke-[2]"></i>
+                    <span class="ml-4 text-lg font-medium sidebar-label">Recolher</span>
+                </button>
+            </div>
         </nav>
 
-        <div class="iffed-main-view">
+        <div id="main-content" class="iffed-main-view">
             <header class="iffed-top-bar">
                 <div class="spacer"></div> <h1 class="page-title mb-0">Página Inicial</h1>
-                <a href="pages/login.php" class="btn btn-sm btn-entrar ms-auto">Entrar</a>
             </header> <main class="iffed-content-feed">
-                <h2>Bem-vindo ao IFFed!</h2>
-                <p>O conteúdo e os posts estão aqui.</p>
+                <h1 class="display-4">Bem-vindo ao IFeed!</h1>
+                <p class="lead">Do corredor direto para a sua timeline.</p>
 
                 <div class="row">
 
@@ -287,14 +319,35 @@ session_start();
             <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
 
             <script>
-                function toggleSidebarMenu() {
-                    var sidebar = document.getElementById('iffedSidebar');
-                    if (sidebar.classList.contains('expanded')) {
-                        sidebar.classList.remove('expanded');
-                    } else {
-                        sidebar.classList.add('expanded');
-                    }
-                }
+                // Inicializa os ícones Lucide
+                if (window.lucide) lucide.createIcons();
+
+                // Lógica da nova Sidebar (toggle expand/collapse)
+                (function(){
+                    var sidebar = document.getElementById('sidebar');
+                    var mainContent = document.getElementById('main-content');
+                    var toggleBtn = document.getElementById('toggleBtn');
+                    var navItems = document.querySelectorAll('.nav-item');
+
+                    if(!toggleBtn) return;
+
+                    toggleBtn.addEventListener('click', function(){
+                        var isExpanded = sidebar.classList.toggle('expanded');
+                        if(isExpanded){
+                            mainContent.style.marginLeft = '260px';
+                            navItems.forEach(function(item){
+                                item.classList.remove('justify-center');
+                                item.classList.add('justify-start','px-4');
+                            });
+                        } else {
+                            mainContent.style.marginLeft = '80px';
+                            navItems.forEach(function(item){
+                                item.classList.remove('justify-start','px-4');
+                                item.classList.add('justify-center');
+                            });
+                        }
+                    });
+                })();
             </script>
         </div>
     </div>

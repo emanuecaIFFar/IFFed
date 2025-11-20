@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sidebar Standalone - ifeed</title>
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <style>
+        body { background-color: #000000; color: #e5e7eb; font-family: sans-serif; }
+        
+        /* Utility para esconder/mostrar labels suavemente */
+        .sidebar-label {
+            opacity: 0;
+            display: none;
+            white-space: nowrap;
+            transition: opacity 0.2s ease-in-out;
+        }
+        
+        .expanded .sidebar-label {
+            display: inline-block;
+            opacity: 1;
+        }
+
+        /* Largura da Sidebar */
+        #sidebar {
+            width: 80px; /* Estado inicial fechado */
+        }
+        #sidebar.expanded {
+            width: 260px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- INÍCIO DA SIDEBAR (Copie daqui para baixo) -->
+    <nav id="sidebar" class="fixed top-0 left-0 h-full bg-black border-r border-[#262626] z-50 flex flex-col justify-between py-5 transition-all duration-300 ease-in-out">
+        
+        <!-- Itens de Navegação Superior -->
+        <div class="flex flex-col w-full px-2 space-y-2">
+            
+            <!-- Item: Início -->
+            <a href="#" class="flex items-center h-[60px] w-full rounded-lg transition-colors duration-200 text-[#a8a8a8] hover:bg-[#181818] hover:text-white justify-center group nav-item" title="Página Inicial">
+                <i data-lucide="home" class="w-7 h-7 stroke-[2]"></i>
+                <span class="ml-4 text-lg font-medium sidebar-label">Página Inicial</span>
+            </a>
+
+            <!-- Item: Pesquisar -->
+            <a href="#" class="flex items-center h-[60px] w-full rounded-lg transition-colors duration-200 text-[#a8a8a8] hover:bg-[#181818] hover:text-white justify-center group nav-item" title="Pesquisar">
+                <i data-lucide="search" class="w-7 h-7 stroke-[2]"></i>
+                <span class="ml-4 text-lg font-medium sidebar-label">Pesquisar</span>
+            </a>
+
+            <!-- Item: Novo Post -->
+            <a href="#" class="flex items-center h-[60px] w-full rounded-lg transition-colors duration-200 text-[#a8a8a8] hover:bg-[#181818] hover:text-white justify-center group nav-item" title="Novo Post">
+                <i data-lucide="plus-square" class="w-7 h-7 stroke-[2]"></i>
+                <span class="ml-4 text-lg font-medium sidebar-label">Novo Post</span>
+            </a>
+
+            <!-- Item: Notificações -->
+            <a href="#" class="flex items-center h-[60px] w-full rounded-lg transition-colors duration-200 text-[#a8a8a8] hover:bg-[#181818] hover:text-white justify-center group nav-item" title="Notificações">
+                <i data-lucide="heart" class="w-7 h-7 stroke-[2]"></i>
+                <span class="ml-4 text-lg font-medium sidebar-label">Notificações</span>
+            </a>
+
+            <!-- Item: Comunidades -->
+            <a href="#" class="flex items-center h-[60px] w-full rounded-lg transition-colors duration-200 text-[#a8a8a8] hover:bg-[#181818] hover:text-white justify-center group nav-item" title="Comunidades">
+                <i data-lucide="users" class="w-7 h-7 stroke-[2]"></i>
+                <span class="ml-4 text-lg font-medium sidebar-label">Comunidades</span>
+            </a>
+
+            <!-- Item: Perfil (ATIVO) -->
+            <!-- Nota: Adicionei classes bg-[#202020] e text-white para indicar que está ativo -->
+            <a href="#" class="flex items-center h-[60px] w-full rounded-lg transition-colors duration-200 text-white bg-[#202020] justify-center group nav-item" title="Perfil">
+                <i data-lucide="user-circle-2" class="w-7 h-7 stroke-[2.5]"></i>
+                <span class="ml-4 text-lg font-medium sidebar-label">Perfil</span>
+            </a>
+        </div>
+
+        <!-- Ações Inferiores (Sair e Menu) -->
+        <div class="flex flex-col w-full px-2 space-y-2 mb-2">
+            
+            <!-- Botão Sair -->
+            <a href="#" class="flex items-center h-[60px] w-full rounded-lg transition-colors duration-200 text-[#a8a8a8] hover:bg-[#181818] hover:text-white justify-center group nav-item" title="Sair">
+                <i data-lucide="log-out" class="w-7 h-7 stroke-[2]"></i>
+                <span class="ml-4 text-lg font-medium sidebar-label">Sair</span>
+            </a>
+
+            <!-- Botão Menu Hambúrguer (Toggle) -->
+            <button id="toggleBtn" class="flex items-center justify-center h-[60px] w-full rounded-lg transition-colors duration-200 text-[#a8a8a8] hover:bg-[#181818] hover:text-white outline-none">
+                <i data-lucide="menu" class="w-7 h-7 stroke-[2]"></i>
+                <span class="ml-4 text-lg font-medium sidebar-label">Recolher</span>
+            </button>
+        </div>
+    </nav>
+    <!-- FIM DA SIDEBAR -->
+
+    <!-- Conteúdo Principal (Apenas para visualização do efeito) -->
+    <main id="main-content" class="ml-[80px] transition-all duration-300 ease-in-out p-10">
+        <h1 class="text-2xl mb-4">Conteúdo da Página</h1>
+        <p class="text-gray-400">O conteúdo se ajusta quando a sidebar expande.</p>
+    </main>
+
+    <!-- Scripts -->
+    <script>
+        // Inicializa os ícones Lucide
+        lucide.createIcons();
+
+        // Lógica da Sidebar
+        const sidebar = document.getElementById('sidebar');
+        const mainContent = document.getElementById('main-content');
+        const toggleBtn = document.getElementById('toggleBtn');
+        const navItems = document.querySelectorAll('.nav-item');
+
+        toggleBtn.addEventListener('click', () => {
+            const isExpanded = sidebar.classList.toggle('expanded');
+            
+            // Ajusta a margem do conteúdo principal
+            if (isExpanded) {
+                mainContent.style.marginLeft = '260px';
+                // Alinha itens à esquerda quando expandido
+                navItems.forEach(item => {
+                    item.classList.remove('justify-center');
+                    item.classList.add('justify-start', 'px-4');
+                });
+            } else {
+                mainContent.style.marginLeft = '80px';
+                // Centraliza itens quando recolhido
+                navItems.forEach(item => {
+                    item.classList.remove('justify-start', 'px-4');
+                    item.classList.add('justify-center');
+                });
+            }
+        });
+    </script>
+</body>
+</html>

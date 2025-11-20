@@ -1,0 +1,23 @@
+
+<!--
+        .iffed-content-feed h1.display-4 {
+            /* Garante uma fonte limpa e sem serifa igual da imagem */
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            
+            font-size: 52px;    /* Levemente menor que 56px para ficar mais elegante */
+            line-height: 1.1;
+            font-weight: 300;   /* MUDANÇA PRINCIPAL: De 700 para 400 (Regular). Na foto a letra é fina. */
+            color: #ffffff;
+            margin: 0 0 5px 0; /* Um pouco mais de espaço embaixo */
+            letter-spacing: -0.5px; /* Aproxima levemente as letras para ficar moderno */
+        }
+
+        .iffed-content-feed p.lead {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            
+            font-size: 20px;    /* MUDANÇA: 14px é muito pequeno. Na foto o texto de apoio é maior. */
+            color: #e0e0e0;     /* Um cinza quase branco, mais claro que o #cfcfcf */
+            margin: 0 0 18px 0;
+            font-weight: 400;   /* Normal */
+        }
+-->

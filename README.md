@@ -94,6 +94,12 @@ IFFed/
 └── index.php          # Página inicial
 ```
 
+## Pasta de Debug
+
+- Existem páginas de debug (por exemplo `pages/debug_db.php`) que exibem componentes padrão do site — como a `sidebar`, `top-bar` e exemplos de cards — para facilitar a criação de novas páginas.
+- Use essas páginas como referência/backup: você pode copiar trechos do layout diretamente das páginas de debug ao criar uma nova view, evitando ter que recriar tudo novamente.
+
+
 ## Como o Front-end deve se comunicar com o Back-end
 
 - `pages/login.php` deve enviar o formulário para `../php/validar_login.php` usando `method="POST"`.
