@@ -47,6 +47,9 @@ $caminho_completo = $pasta_destino . $novo_nome;
 
 if(move_uploaded_file($arquivo['tmp_name'], $caminho_completo)){
     // Salvar caminho relativo no banco (uploads/nome)
+    // IMPORTANTE: aqui movemos o arquivo para o diretório físico
+    // `assets_front/img/uploads/` e salvamos no banco apenas o caminho
+    // relativo `uploads/<nome>`. A imagem em si fica no disco, não no DB.
     $nome_arquivo_bd = 'uploads/' . $novo_nome;
 
     $nome_arquivo_bd_esc = $conn->real_escape_string($nome_arquivo_bd);
