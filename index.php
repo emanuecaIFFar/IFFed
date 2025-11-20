@@ -261,21 +261,14 @@ session_start();
 
         <div class="iffed-main-view">
             <header class="iffed-top-bar">
-                <div class="spacer"></div>
-                <h1 class="page-title mb-0">Página Inicial</h1>
-                <?php if (!isset($_SESSION['nome_usuario'])): ?>
-                    <a href="pages/login.php" class="btn btn-sm btn-entrar ms-auto">Entrar</a>
-                <?php else: ?>
-                    <a href="pages/perfil.php" class="btn btn-sm btn-entrar ms-auto">Meu perfil</a>
-                <?php endif; ?>
-            </header>
+                <div class="spacer"></div> <h1 class="page-title mb-0">Página Inicial</h1>
+                <a href="pages/login.php" class="btn btn-sm btn-entrar ms-auto">Entrar</a>
+            </header> <main class="iffed-content-feed">
+                <h2>Bem-vindo ao IFFed!</h2>
+                <p>O conteúdo e os posts estão aqui.</p>
 
-            <main class="iffed-content-feed">
-                <h2>Bem-vindo ao IFeed!</h2>
-                <p>Do corredor direto para a sua timeline.</p>
+                <div class="row">
 
-                <!-- Primeiro post fixo, alinhado à esquerda como um post normal -->
-                <div class="row mt-4">
                     <div class="col-sm-12 col-md-6 col-lg-4 mb-4">
                         <div class="card h-100">
                             <img src="assets/img/IFFed.jpg" class="card-img-top" alt="Logo IFFed">

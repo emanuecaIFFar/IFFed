@@ -1,0 +1,41 @@
+-- 1. Cria o banco com o nome que você escolheu
+CREATE DATABASE IF NOT EXISTS iffed;
+
+-- 2. Seleciona esse banco para usar
+USE iffed;
+
+-- 3. Cria a tabela de Perfil (Usuários)
+CREATE TABLE IF NOT EXISTS perfil (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nome VARCHAR(100) NOT NULL,
+    email VARCHAR(100) NOT NULL UNIQUE, -- Email único para o login não confundir
+    senha VARCHAR(255) NOT NULL,
+    data_nasc DATE,
+    bio TEXT,
+    foto VARCHAR(255) DEFAULT 'padrao.jpg' -- Caminho da foto
+);
+
+-- 4. Cria a tabela de Postagens (Ligada ao usuário)
+CREATE TABLE IF NOT EXISTS postagens (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    id_usuario INT NOT NULL,
+    conteudo_textual TEXT,
+    imagem VARCHAR(255),
+    data_criacao DATETIME DEFAULT CURRENT_TIMESTAMP,
+    num_curtidas INT DEFAULT 0,
+    num_comentarios INT DEFAULT 0,
+    FOREIGN KEY (id_usuario) REFERENCES perfil(id) -- Chave estrangeira
+);
+
+-- 5. Cria tabela de Curtidas (Relacionamento N:N)
+CREATE TABLE IF NOT EXISTS curtidas (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    id_usuario INT NOT NULL,
+    id_postagem INT NOT NULL,
+    FOREIGN KEY (id_usuario) REFERENCES perfil(id),
+    FOREIGN KEY (id_postagem) REFERENCES postagens(id)
+);
+
+-- 6. Insere um usuário Admin para você testar o login agora
+INSERT INTO perfil (nome, email, senha, bio) 
+VALUES ('Admin', 'admin@iffed.com', '123', 'Conta de Teste');
