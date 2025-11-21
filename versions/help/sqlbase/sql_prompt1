@@ -1,21 +1,31 @@
--- 1. Cria o banco com o nome que você escolheu
-CREATE DATABASE IF NOT EXISTS iffed;
+/*
+  ARQUIVO MESTRE - BANCO DE DADOS IFFED
+  Data: 20/11/2025
+  Descrição: Script completo para criação do banco, tabelas, relacionamentos e triggers.
+*/
 
--- 2. Seleciona esse banco para usar
+-- ========================================================
+-- 1. CRIAÇÃO DO BANCO DE DADOS E SELEÇÃO
+-- ========================================================
+CREATE DATABASE IF NOT EXISTS iffed;
 USE iffed;
 
--- 3. Cria a tabela de Perfil (Usuários)
+-- ========================================================
+-- 2. TABELAS PRINCIPAIS (BÁSICAS)
+-- ========================================================
+
+-- Tabela de Perfil (Usuários)
 CREATE TABLE IF NOT EXISTS perfil (
     id INT AUTO_INCREMENT PRIMARY KEY,
     nome VARCHAR(100) NOT NULL,
-    email VARCHAR(100) NOT NULL UNIQUE, -- Email único para o login não confundir
-    senha VARCHAR(255) NOT NULL,
+    email VARCHAR(100) NOT NULL UNIQUE, -- Email único para login
+    senha VARCHAR(255) NOT NULL,        -- Tamanho 255 para suportar hash
     data_nasc DATE,
     bio TEXT,
     foto VARCHAR(255) DEFAULT 'padrao.jpg' -- Caminho da foto
-);
+) ENGINE=InnoDB;
 
--- 4. Cria a tabela de Postagens (Ligada ao usuário)
+-- Tabela de Postagens
 CREATE TABLE IF NOT EXISTS postagens (
     id INT AUTO_INCREMENT PRIMARY KEY,
     id_usuario INT NOT NULL,
@@ -24,18 +34,104 @@ CREATE TABLE IF NOT EXISTS postagens (
     data_criacao DATETIME DEFAULT CURRENT_TIMESTAMP,
     num_curtidas INT DEFAULT 0,
     num_comentarios INT DEFAULT 0,
-    FOREIGN KEY (id_usuario) REFERENCES perfil(id) -- Chave estrangeira
-);
+    FOREIGN KEY (id_usuario) REFERENCES perfil(id)
+) ENGINE=InnoDB;
 
--- 5. Cria tabela de Curtidas (Relacionamento N:N)
+-- Tabela de Curtidas
 CREATE TABLE IF NOT EXISTS curtidas (
     id INT AUTO_INCREMENT PRIMARY KEY,
     id_usuario INT NOT NULL,
     id_postagem INT NOT NULL,
     FOREIGN KEY (id_usuario) REFERENCES perfil(id),
     FOREIGN KEY (id_postagem) REFERENCES postagens(id)
-);
+) ENGINE=InnoDB;
 
--- 6. Insere um usuário Admin para você testar o login agora
+-- ========================================================
+-- 3. NOVAS TABELAS (INTERAÇÕES AVANÇADAS)
+-- ========================================================
+
+-- Tabela de Comentários
+CREATE TABLE IF NOT EXISTS comentarios (
+    id INT NOT NULL AUTO_INCREMENT,
+    conteudo TEXT NOT NULL,
+    data_criacao DATETIME DEFAULT CURRENT_TIMESTAMP,
+    id_usuario INT NOT NULL,
+    id_postagem INT NOT NULL,
+    PRIMARY KEY (id),
+    -- ON DELETE CASCADE: Se apagar user ou post, apaga o comentário junto
+    FOREIGN KEY (id_usuario) REFERENCES perfil(id) ON DELETE CASCADE,
+    FOREIGN KEY (id_postagem) REFERENCES postagens(id) ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+-- Tabela de Notificações
+CREATE TABLE IF NOT EXISTS notificacoes (
+    id INT NOT NULL AUTO_INCREMENT,
+    id_usuario_destino INT NOT NULL, -- Quem recebe o aviso
+    id_usuario_origem INT NOT NULL,  -- Quem fez a ação
+    tipo ENUM('curtida', 'comentario', 'seguindo') NOT NULL,
+    id_postagem INT, 
+    lida TINYINT(1) DEFAULT 0, -- 0 = não lida, 1 = lida
+    data_criacao DATETIME DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (id),
+    FOREIGN KEY (id_usuario_destino) REFERENCES perfil(id) ON DELETE CASCADE,
+    FOREIGN KEY (id_usuario_origem) REFERENCES perfil(id) ON DELETE CASCADE,
+    FOREIGN KEY (id_postagem) REFERENCES postagens(id) ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+-- ========================================================
+-- 4. AUTOMATIZAÇÃO (TRIGGERS)
+-- ========================================================
+-- Atualiza automaticamente o contador de comentários na tabela postagens
+
+DELIMITER $$
+
+CREATE TRIGGER trg_novo_comentario AFTER INSERT ON comentarios
+FOR EACH ROW
+BEGIN
+    UPDATE postagens 
+    SET num_comentarios = num_comentarios + 1 
+    WHERE id = NEW.id_postagem;
+END $$
+
+CREATE TRIGGER trg_apaga_comentario AFTER DELETE ON comentarios
+FOR EACH ROW
+BEGIN
+    UPDATE postagens 
+    SET num_comentarios = num_comentarios - 1 
+    WHERE id = OLD.id_postagem;
+END $$
+
+DELIMITER ;
+
+-- ========================================================
+-- 5. ESTRUTURA PARA COMUNIDADES (FUTURO/OPCIONAL)
+-- ========================================================
+
+CREATE TABLE IF NOT EXISTS comunidades (
+    id INT NOT NULL AUTO_INCREMENT,
+    nome VARCHAR(100) NOT NULL,
+    descricao TEXT,
+    foto_capa VARCHAR(255),
+    data_criacao DATETIME DEFAULT CURRENT_TIMESTAMP,
+    id_dono INT NOT NULL,
+    PRIMARY KEY (id),
+    FOREIGN KEY (id_dono) REFERENCES perfil(id)
+) ENGINE=InnoDB;
+
+CREATE TABLE IF NOT EXISTS membros_comunidade (
+    id INT NOT NULL AUTO_INCREMENT,
+    id_comunidade INT NOT NULL,
+    id_usuario INT NOT NULL,
+    data_entrada DATETIME DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (id),
+    FOREIGN KEY (id_comunidade) REFERENCES comunidades(id) ON DELETE CASCADE,
+    FOREIGN KEY (id_usuario) REFERENCES perfil(id) ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+-- ========================================================
+-- 6. DADOS INICIAIS (SEED)
+-- ========================================================
+
 INSERT INTO perfil (nome, email, senha, bio) 
 VALUES ('Admin', 'admin@iffed.com', '123', 'Conta de Teste');
+-- Nota: Em produção, lembre-se de usar password_hash() para gerar a senha.
