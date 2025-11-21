@@ -17,6 +17,18 @@ $sql = "SELECT * FROM perfil WHERE id = $id_usuario";
 $resultado = $conn->query($sql);
 $dados_usuario = $resultado->fetch_assoc();
 
+// Normaliza caminho da foto para uso nas views
+$foto_val = $dados_usuario['foto'] ?? '';
+if (empty($foto_val)) {
+    $foto_path = '../assets_front/img/padrao.jpg';
+} elseif (strpos($foto_val, 'uploads/') === 0) {
+    $foto_path = '../assets_front/img/' . $foto_val; // já armazena 'uploads/nome.jpg'
+} elseif (strpos($foto_val, 'assets_front') !== false || strpos($foto_val, 'http') === 0) {
+    $foto_path = $foto_val;
+} else {
+    $foto_path = '../assets_front/img/uploads/' . $foto_val; // só o nome do arquivo
+}
+
 ?>
 
 
@@ -181,9 +193,10 @@ $dados_usuario = $resultado->fetch_assoc();
                             <div class="relative group">
                                 <div class="w-48 h-48 rounded-full overflow-hidden border-4 border-[#2a2a2a] shadow-lg bg-black">
                                     <img 
-                                        src="../assets_front/img/<?php echo !empty($dados_usuario['foto']) ? $dados_usuario['foto'] : 'padrao.jpg'; ?>" 
+                                        src="<?php echo $foto_path; ?>" 
                                         alt="Profile Avatar" 
                                         class="w-full h-full object-cover opacity-90 group-hover:opacity-100 transition-opacity"
+                                        onerror="this.onerror=null;this.src='../assets_front/img/padrao.jpg';"
                                     />
                                 </div>
                                 <button 
@@ -260,6 +273,57 @@ $dados_usuario = $resultado->fetch_assoc();
 
         </main>
     </div>
+
+        <!-- Lista de postagens do usuário logado -->
+        <div class="p-6 md:p-10">
+            <div class="w-full max-w-4xl mx-auto">
+                <h3 class="text-lg font-semibold text-white mb-4">Suas Publicações</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <?php
+                    // Busca posts do usuário logado
+                    $stmt = $conn->prepare('SELECT id, conteudo_textual, imagem, data_criacao, num_curtidas, num_comentarios FROM postagens WHERE id_usuario = ? ORDER BY data_criacao DESC');
+                    $stmt->bind_param('i', $id_usuario);
+                    $stmt->execute();
+                    $res2 = $stmt->get_result();
+                    while($p = $res2->fetch_assoc()) {
+                        $p_conteudo = nl2br(htmlspecialchars($p['conteudo_textual']));
+                        $p_img = $p['imagem'] ? '../assets_front/img/uploads/' . $p['imagem'] : null;
+                        $p_data = date('d/m/Y H:i', strtotime($p['data_criacao']));
+                    ?>
+                    <div class="bg-[#1E1E1E] border border-[#333] rounded-lg p-3">
+                        <div class="flex items-start gap-3">
+                            <div style="width:44px; height:44px; overflow:hidden; border-radius:50%;">
+                                <img src="<?php echo $foto_path; ?>" alt="Avatar" style="width:100%; height:100%; object-fit:cover;" onerror="this.onerror=null;this.src='../assets_front/img/padrao.jpg';">
+                            </div>
+                            <div class="flex-grow">
+                                <div class="text-white font-semibold"><?php echo htmlspecialchars($dados_usuario['nome'] ?: $_SESSION['nome_usuario']); ?></div>
+                                <small class="text-[#888]"><?php echo $p_data; ?></small>
+                                <div class="mt-3 text-gray-300"><?php echo $p_conteudo ?: '<em>—</em>'; ?></div>
+                                <?php if ($p_img): ?>
+                                    <div class="mt-3">
+                                        <img src="<?php echo $p_img; ?>" alt="Imagem" style="max-width:100%; height:auto;" onerror="this.style.display='none';">
+                                    </div>
+                                <?php endif; ?>
+                                <div class="mt-3 flex items-center justify-between">
+                                    <div class="text-gray-400">
+                                        <i class="bi bi-heart"></i> <span class="ms-1"><?php echo intval($p['num_curtidas']); ?></span>
+                                        <i class="bi bi-chat ms-3"></i> <span class="ms-1"><?php echo intval($p['num_comentarios']); ?></span>
+                                    </div>
+                                    <div>
+                                        <form method="POST" action="../php/delete_post.php" onsubmit="return confirm('Apagar esta publicação?');">
+                                            <input type="hidden" name="post_id" value="<?php echo intval($p['id']); ?>">
+                                            <button type="submit" class="px-3 py-1 bg-red-600 text-white rounded-md text-sm">Apagar</button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <?php } 
+                    $stmt->close(); ?>
+                </div>
+            </div>
+        </div>
 
     <!-- JAVASCRIPT -->
     <script>

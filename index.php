@@ -177,6 +177,14 @@ session_start();
             color: #e0e0e0;
         }
 
+        /* Meta dos posts (handle, data) — mais contraste que o .text-muted padrão do Bootstrap */
+        .iffed-content-feed .card-header small.post-meta {
+            color: #646464ff; /* mais claro que #888 */
+            opacity: 0.95;
+            font-weight: 500;
+            font-size: 0. ninetyfiverem;
+        }
+
         .iffed-content-feed .card .card-img-top {
             border-radius: 0; /* Para remover arredondamento se o card header estiver presente */
              margin-top:0; /* Resetando margem da imagem original */
@@ -300,20 +308,79 @@ session_start();
                 <p class="lead">Do corredor direto para a sua timeline.</p>
 
                 <div class="row">
+                    <?php
+                    // Carrega posts mais recentes e mostra no feed
+                    require_once __DIR__ . '/php/conexao.php';
+
+                    $sql = "SELECT p.id, p.conteudo_textual, p.imagem, p.data_criacao, p.num_comentarios, p.num_curtidas, u.id AS usuario_id, u.nome, u.foto
+                            FROM postagens p
+                            LEFT JOIN perfil u ON p.id_usuario = u.id
+                            ORDER BY p.data_criacao DESC
+                            LIMIT 50";
+
+                    if ($res = $conn->query($sql)) {
+                        while ($row = $res->fetch_assoc()) {
+                            $autorNome = htmlspecialchars($row['nome'] ?? 'Usuário');
+                            $foto = $row['foto'] ?? '';
+                            if (empty($foto)) {
+                                $autorFoto = 'assets_front/img/padrao.jpg';
+                            } elseif (strpos($foto, 'uploads/') === 0) {
+                                $autorFoto = 'assets_front/img/' . $foto; // foto já guarda 'uploads/arquivo.jpg'
+                            } elseif (strpos($foto, 'assets_front') !== false || strpos($foto, 'http') === 0) {
+                                $autorFoto = $foto;
+                            } else {
+                                $autorFoto = 'assets_front/img/uploads/' . $foto; // nome simples
+                            }
+                            $conteudo = nl2br(htmlspecialchars($row['conteudo_textual']));
+                            $imagem = $row['imagem'] ? 'assets_front/img/uploads/' . $row['imagem'] : null;
+                            $data = date('d/m/Y H:i', strtotime($row['data_criacao']));
+                            $num_curtidas = intval($row['num_curtidas']);
+                            $num_comentarios = intval($row['num_comentarios']);
+                    ?>
 
                     <div class="col-sm-12 col-md-6 col-lg-4 mb-4">
                         <div class="card h-100">
-                            <img src="assets/img/IFFed.jpg" class="card-img-top" alt="Logo IFFed">
-                            <div class="card-footer post-actions">
-                                <i class="bi bi-heart" title="Curtir"></i>
-                                <i class="bi bi-chat" title="Comentar"></i>
-                                <i class="bi bi-send" title="Compartilhar"></i>
+                            <div class="card-header d-flex align-items-center">
+                                    <div class="me-3" style="width:44px; height:44px; overflow:hidden; border-radius:50%;">
+                                    <img src="<?php echo $autorFoto; ?>" alt="Avatar" style="width:100%; height:100%; object-fit:cover;" onerror="this.onerror=null;this.src='assets_front/img/padrao.jpg';">
+                                </div>
+                                <div class="flex-grow-1">
+                                    <div class="card-title mb-0"><?php echo $autorNome; ?></div>
+                                    <small class="post-meta">@<?php echo strtolower(preg_replace('/\s+/','_', $autorNome)); ?> • <?php echo $data; ?></small>
+                                </div>
+                            </div>
+
+                            <?php if ($imagem): ?>
+                                <img src="<?php echo $imagem; ?>" class="card-img-top" alt="Post image" onerror="this.style.display='none';">
+                            <?php endif; ?>
+
+                            <div class="card-body">
+                                <p class="card-text"><?php echo $conteudo ?: '<em>—</em>'; ?></p>
+                            </div>
+
+                            <div class="card-footer post-actions d-flex align-items-center justify-content-between">
+                                <div>
+                                    <i class="bi bi-heart" title="Curtir"></i>
+                                    <span class="ms-2"><?php echo $num_curtidas; ?></span>
+                                    <i class="bi bi-chat ms-3" title="Comentar"></i>
+                                    <span class="ms-2"><?php echo $num_comentarios; ?></span>
+                                </div>
+                                <div>
+                                    <i class="bi bi-send" title="Compartilhar"></i>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
 
-                <!-- Aqui futuramente entram os posts reais dos usuários (não centralizados) -->
+                    <?php
+                        }
+                        $res->free();
+                    } else {
+                        // Em caso de erro, mostra mensagem simples no feed
+                        echo '<div class="col-12"><div class="alert alert-warning">Não foi possível carregar as postagens.</div></div>';
+                    }
+                    ?>
+                </div>
             </main>
 
             <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
