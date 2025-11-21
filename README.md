@@ -162,112 +162,203 @@ Se quiser, posso ajudar a:
 Boa sorte com o projeto! 🚀
 
 
-## Backend — Especificação e Checklist
+## Backend — IFeed
 
-Este trecho descreve a especificação mínima necessária para implementar o backend do IFFed (posts, curtidas, comentários, comunidades e notificações). Use como referência ao criar tabelas, endpoints e integrações com o front-end já existente.
+Inclui: como as sessões são usadas, responsabilidades dos arquivos PHP existentes, fluxos principais (login, cadastro, upload, posts, curtidas, comentários) e exemplos práticos.
 
-### Visão Geral
-- Objetivo: Backend leve em PHP + MySQL que suporte: criar post, curtir, comentar, comunidades (criar/entrar/limite), e notificações integradas.
-- Sessão: o sistema usa `$_SESSION['id']` e `$_SESSION['nome_usuario']` para identificar o usuário.
-- Uploads: salvar arquivos em `assets_front/img/uploads/`.
+**Variáveis de sessão usadas**
+- `$_SESSION['id']` — id numérico do usuário autenticado (PK na tabela `perfil`).
+- `$_SESSION['nome_usuario']` — nome de exibição do usuário (usado na UI e para checagens simples).
 
-### Estrutura de Dados (tabelas sugeridas)
-- `users`: id, nome, email, senha, foto, criado_em
-- `posts`: id, user_id, content, image (nullable), community_id (nullable), created_at, updated_at, is_deleted
-- `likes`: id, user_id, post_id, created_at  (UNIQUE user_id+post_id)
-- `comments`: id, user_id, post_id, content, created_at
-- `communities`: id, creator_user_id, name, description, cover_image, member_limit (default 50), created_at, is_private
-- `community_members`: id, community_id, user_id, role (member/moderator), joined_at (UNIQUE community_id+user_id)
-- `notifications`: id, user_target_id, actor_user_id, type, post_id (nullable), comment_id (nullable), community_id (nullable), data_json (nullable), is_read (boolean), created_at
+Todas as páginas/ endpoints que exigem autenticação devem chamar `session_start()` no topo do arquivo e checar `isset($_SESSION['id'])` antes de realizar ações sensíveis.
 
-> Índices recomendados: `posts.created_at`, `likes.post_id`, `comments.post_id`, `(notifications.user_target_id, is_read)`.
+**Visão geral dos arquivos PHP existentes (papel de cada um)**
 
-### Tipos de Notificação (mínimo)
-- `like` — quando alguém curte um post (target = autor do post)
-- `comment` — quando alguém comenta um post (target = autor do post)
-- `post_in_community` — quando um post é criado dentro de uma comunidade (opcional notificar membros/seguidores)
-- `community_invite` — quando um usuário é convidado/ adicionado a uma comunidade
-- `community_join` — quando alguém entra em uma comunidade (notificar criador/mods)
-- `follow` — opcional (quando alguém segue outro usuário)
+- `php/conexao.php`
+  - Responsabilidade: estabelecer e exportar a conexão com MySQL (mysqli). Deve centralizar host, usuário, senha e nome do banco.
+  - Uso típico: incluir com `require_once '../php/conexao.php';` e usar a variável/objeto de conexão retornado.
 
-Mantenha apenas os tipos que serão usados para evitar complexidade desnecessária.
+- `php/validar_login.php`
+  - Responsabilidade: receber dados do formulário de login (tipicamente `POST: email, senha`), verificar credenciais no banco e iniciar a sessão.
+  - Fluxo:
+    1. `session_start()`
+    2. Ler `$_POST['email']` e `$_POST['senha']`.
+    3. Buscar usuário na tabela `perfil` por email.
+    4. Verificar senha (atualmente o projeto pode usar comparação simples; substituir por `password_verify()` quando usar hashes).
+    5. Se autenticado: setar `$_SESSION['id'] = $id` e `$_SESSION['nome_usuario'] = $nome` e redirecionar para a página principal/ perfil.
+    6. Se falha: redirecionar de volta para o formulário com erro.
 
-### Regras e Fluxos Principais
-- Criar Post
-	- Verificar sessão; validar conteúdo/arquivo.
-	- Salvar imagem em `assets_front/img/uploads/` com nome seguro (timestamp+uid).
-	- Inserir em `posts` (usar `community_id` se for post em comunidade).
-	- Se `community_id` preenchido: opcionalmente criar notificações `post_in_community` para membros/opt-ins.
+- `php/cadastrar.php`
+  - Responsabilidade: processar formulário de cadastro (inclui upload de foto, criar registro em `perfil`).
+  - Fluxo:
+    1. `session_start()` (opcional, apenas se desejar logar automaticamente após cadastro).
+    2. Receber campos via `$_POST` e arquivo via `$_FILES` (se houver upload de foto).
+    3. Validar entradas (email único, formato, senha forte).
+    4. Mover arquivo para `assets_front/img/uploads/` com nome seguro e salvar nome no campo `foto` (ex.: `time() . '_' . $userId . '.' . $ext`).
+    5. Inserir registro em `perfil`.
+    6. Redirecionar com `?sucesso=cadastrado` ou mensagem de erro.
 
-- Curtir (Like)
-	- Endpoint recebe `post_id` e ação (`like`/`unlike`).
-	- Inserir/deletar em `likes`. Se inseriu e autor ≠ actor, criar `notification` tipo `like`.
+- `php/sair.php`
+  - Responsabilidade: encerrar a sessão do usuário.
+  - Fluxo: `session_start(); session_unset(); session_destroy();` e redirecionar para a página pública (ex.: `index.php`).
 
-- Comentar
-	- Endpoint recebe `post_id` e `content`.
-	- Inserir em `comments`.
-	- Criar `notification` tipo `comment` para autor do post (se autor ≠ actor).
-	- Opcional: notificar outros comentadores recentes (evitar duplicidade).
+- `php/upload_foto_teste.php` (se presente)
+  - Responsabilidade: handler separado para testar upload de foto. Deve validar tipo/ tamanho e devolver sucesso/erro.
 
-- Comunidades
-	- Criar comunidade: inserir em `communities`; adicionar criador em `community_members`.
-	- Adicionar membro: checar `member_limit` (default 50). Inserir em `community_members` e criar `community_join`/`community_invite`.
-	- Ao entrar: exibir comunidade no `perfil` do usuário (query em `community_members`).
-	- Ao publicar em comunidade: criar `posts` com `community_id`; notificar membros conforme política (mods/opt-in).
-
-### Endpoints sugeridos (arquivos `php/`)
-- `php/create_post.php` — criar post (POST: `content`, optional `community_id`, `image`)
-- `php/like.php` — like/unlike (POST: `post_id`, `action`)
-- `php/comment.php` — criar comentário (POST: `post_id`, `content`)
-- `php/create_community.php` — criar comunidade (POST: `name`, `description`, optional `cover_image`, `member_limit`)
-- `php/add_community_member.php` — adicionar/aceitar membro (POST: `community_id`, `user_id`)
-- `php/get_notifications.php` — retornar notificações do usuário (GET)
-- `php/mark_notifications_read.php` — marcar notificações como lidas (POST)
-- `php/get_posts.php` — retornar posts (GET: `page`, optional `community_id`)
-- `php/get_community_members.php` — listar membros de uma comunidade (GET)
-- `php/get_user_profile.php` — retornar perfil + comunidades + posts do usuário (GET)
-
-Endpoints podem retornar JSON e usar checagem de sessão para endpoints privados.
-
-### Regras de Segurança e Validação
-- Verificar `session_start()` e `isset($_SESSION['id'])` em endpoints privados (return 401 se não autenticado).
-- Usar prepared statements (mysqli) para evitar SQL injection.
-- Validar uploads (MIME type, tamanho) e renomear arquivos antes de salvar.
-- Checar permissões para ações sensíveis (ex.: remover post, adicionar membro). 
-
-### Performance e Limitações Práticas
-- Não notificar todos os membros para cada post em comunidade (estratégias: notificar mods/opt-ins; limitar a N; enfileirar processamento).
-- Usar paginação em `get_posts` e `get_notifications`.
-- Denormalizar contadores (`likes_count`, `comments_count`) apenas se necessário.
-
-### Fluxos Resumidos (exemplos)
-- Usuário cria post público → `posts` insert → aparece no `index`.
-- Usuário B curte post de A → `likes` insert → `notifications` tipo `like` para A.
-- Usuário C comenta post de A → `comments` insert → `notifications` tipo `comment` para A.
-- Usuário cria comunidade X (member_limit 50) → inserido em `communities`, criador vira membro.
-
-### Checklist prático de Implementação
-- [ ] Criar tabelas no banco conforme modelo.
-- [ ] Implementar endpoints `php/*.php` com validações e checks de sessão.
-- [ ] Garantir pasta `assets_front/img/uploads/` com permissões de escrita.
-- [ ] Integrar front (forms/AJAX) com os endpoints.
-- [ ] Implementar `php/get_notifications.php` e contador no header/top-bar.
-- [ ] Testar fluxos: criar post → curtir → comentar → criar comunidade → adicionar membro → verificar notificações.
-
-### Recomendações / Melhorias Futuras
-- Preferências de notificação (mute/unmute por comunidade/tipo).
-- Real-time (WebSocket/Pusher) para notificações em tempo real.
-- Processamento assíncrono de notificações (fila) para escalar.
-- Migrar senhas para `password_hash()` e `password_verify()`.
-
-### Onde colocar este documento
-- Sugestão: manter esta seção dentro do `README.md` como "Backend — Especificação e Checklist" (já adicionada aqui). Para documentação separada, crie `README.backend.md`.
+Observação: podem existir arquivos adicionais em `php/` com lógicas específicas; os nomes acima são os principais lidos pelo front-end atual.
 
 ---
 
-Se quiser, posso gerar também:
-- Exemplos de payload JSON para cada endpoint (sem código de implementação).
-- Um diagrama ER textual (relacionamentos entre tabelas) para colar no README.
+## Fluxos principais (detalhados)
 
-Informe se quer que eu adicione payloads ou o diagrama ER a seguir neste mesmo arquivo.
+### 1) Login
 
+- Request: método `POST` para `php/validar_login.php` com campos `email` e `senha`.
+- Ação do servidor:
+  - `session_start()`
+  - Buscar usuário por `email` na tabela `perfil`.
+  - Comparar senhas (ideal: `password_verify($senhaEntrada, $senhaHashNoDB)`).
+  - Se OK: setar `$_SESSION['id']` e `$_SESSION['nome_usuario']` e redirecionar para `pages/perfil.php`.
+  - Se não: redirecionar para login com `?erro=credenciais`.
+
+Exemplo (esqueleto):
+
+```php
+<?php
+session_start();
+require_once 'conexao.php';
+
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') { header('Location: ../pages/login.php'); exit; }
+
+$email = $_POST['email'] ?? '';
+$senha = $_POST['senha'] ?? '';
+
+$stmt = $conn->prepare('SELECT id, nome, senha FROM perfil WHERE email = ? LIMIT 1');
+$stmt->bind_param('s', $email);
+$stmt->execute();
+$res = $stmt->get_result();
+if ($user = $res->fetch_assoc()) {
+    if (password_verify($senha, $user['senha'])) {
+        $_SESSION['id'] = (int)$user['id'];
+        $_SESSION['nome_usuario'] = $user['nome'];
+        header('Location: ../pages/perfil.php');
+        exit;
+    }
+}
+header('Location: ../pages/login.php?erro=credenciais');
+```
+
+### 2) Cadastro (com upload opcional)
+
+- Request: `POST` para `php/cadastrar.php` com campos do formulário e `enctype="multipart/form-data"` se houver imagem.
+- Ação do servidor:
+  - Validar campos obrigatórios.
+  - Checar duplicidade de e-mail.
+  - Processar `$_FILES['foto_perfil']`: validar MIME, tamanho e mover para `assets_front/img/uploads/` com nome seguro.
+  - Inserir novo registro em `perfil` (armazenar o nome do arquivo no campo `foto`).
+  - Redirecionar para `pages/login.php?sucesso=cadastrado` ou logar automaticamente.
+
+### 3) Upload de imagens (regra geral)
+
+- Boas práticas:
+  - Validar tipo real com `getimagesize()` e não confiar apenas no `$_FILES['type']`.
+  - Limitar tamanho (ex.: 2-5MB).
+  - Renomear arquivo: `time() . '_' . bin2hex(random_bytes(6)) . '.' . $ext`.
+  - Definir permissões seguras e armazenar apenas o nome/ caminho relativo no DB.
+
+### 4) Criar Post
+
+- Request: `POST` para `php/create_post.php` (sugerido) com `conteudo_textual`, opcional `imagem`.
+- Ação do servidor:
+  - `session_start()` e checar `$_SESSION['id']`.
+  - Validar conteúdo e processar upload (se houver).
+  - Inserir em `postagens` com `id_usuario = $_SESSION['id']` e `data_criacao = NOW()`.
+
+### 5) Curtir (Like)
+
+- Request: `POST` para `php/like.php` com `id_postagem` e `action` (`like` ou `unlike`).
+- Ação do servidor:
+  - `session_start()` e checar `$_SESSION['id']`.
+  - Inserir ou remover registro em `curtidas`.
+  - Atualizar contador em `postagens.num_curtidas` (opcional, ou calcular com `COUNT(*)`).
+
+### 6) Comentar
+
+- Request: `POST` para `php/comment.php` com `id_postagem` e `conteudo`.
+- Ação do servidor:
+  - Checar sessão, inserir em `comments` (usar FK para `postagens`), criar notificação para autor do post.
+
+---
+
+## Mapeamento do esquema atual (tabelas que existem e campos relevants)
+
+- `perfil` (users)
+  - id (PK int auto_increment)
+  - nome (varchar)
+  - senha (varchar) — reforçar uso de hash
+  - email (varchar, UNIQUE)
+  - foto (varchar, nome relativo do arquivo)
+  - data_nasc (date)
+  - bio (text)
+
+- `postagens` (posts)
+  - id (PK)
+  - conteudo_textual (text)
+  - data_criacao (datetime)
+  - id_usuario (FK -> perfil.id)
+  - imagem (varchar)
+  - num_comentarios (int)
+  - num_curtidas (int)
+
+- `curtidas` (likes)
+  - id (PK)
+  - id_postagem (FK -> postagens.id)
+  - id_usuario (FK -> perfil.id)
+
+Tabelas recomendadas a adicionar: `comments`, `notifications`, `communities`, `community_members` (DDL sugerido no `README.md`).
+
+---
+
+## Segurança e validação (práticas obrigatórias)
+
+- Sempre usar prepared statements (`$stmt = $conn->prepare(...)`) e bind de parâmetros para evitar SQL Injection.
+- Usar `password_hash()` para armazenar senhas e `password_verify()` no login.
+- Sanitizar saídas com `htmlspecialchars()` antes de inserir dados em HTML.
+- Proteger endpoints com `session_start()` + checagem de `$_SESSION['id']`.
+- Validar uploads: tamanho máximo, limitar tipos (jpeg/png/webp), verificar com `getimagesize()`.
+
+## Exemplo de checagem de sessão (topo de um endpoint privado)
+
+```php
+<?php
+session_start();
+if (!isset($_SESSION['id'])) {
+    http_response_code(401);
+    echo json_encode(['error' => 'não autenticado']);
+    exit;
+}
+// continuar com a lógica do endpoint
+```
+
+## Respostas e formato (recomendação)
+
+- Endpoints de API (novos) devem retornar JSON com estrutura clara:
+  - sucesso: `{ "success": true, "data": {...} }`
+  - erro: `{ "success": false, "error": "mensagem" }`
+
+Isso facilita integração via AJAX no front-end.
+
+## Logs e diagnóstico
+
+- Registrar erros críticos em arquivo de log (ex.: `logs/error.log`) com `error_log()`.
+- Em ambiente dev, exibir erros; em produção, desabilitar exibição de erro e somente logar.
+
+## Tarefas recomendadas para próxima iteração
+
+- Migrar as senhas existentes para `password_hash()` (criar script de migração se necessário).
+- Criar endpoints esqueleto em `php/` para `create_post.php`, `like.php`, `comment.php` e `get_posts.php`.
+- Adicionar tabela `comments` e `notifications` no banco.
+
+---
+
+Se desejar, este documento pode ser copiado para o `README.md` principal ou mantido como `README.backend.md`. Também é possível gerar exemplos de payload JSON e os esboços dos endpoints em PHP conforme o estilo e as práticas descritas aqui.
