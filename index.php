@@ -257,11 +257,11 @@ session_start();
                     <i data-lucide="home" class="w-7 h-7 stroke-[2]"></i>
                     <span class="ml-4 text-lg font-medium sidebar-label">Página Inicial</span>
                 </a>
-                <a href="pages/pesquisar_nseifazerisso.html" class="flex items-center h-[60px] w-full rounded-lg transition-colors duration-200 text-[#a8a8a8] hover:bg-[#181818] hover:text-white justify-center group nav-item" title="Pesquisar">
+                <a href="pages/pesquisar_nseifazrisso.html" class="flex items-center h-[60px] w-full rounded-lg transition-colors duration-200 text-[#a8a8a8] hover:bg-[#181818] hover:text-white justify-center group nav-item" title="Pesquisar">
                     <i data-lucide="search" class="w-7 h-7 stroke-[2]"></i>
                     <span class="ml-4 text-lg font-medium sidebar-label">Pesquisar</span>
                 </a>
-                <a href="criar_post" class="flex items-center h-[60px] w-full rounded-lg transition-colors duration-200 text-[#a8a8a8] hover:bg-[#181818] hover:text-white justify-center group nav-item" title="Novo Post">
+                <a href="pages/criar_post.html" class="flex items-center h-[60px] w-full rounded-lg transition-colors duration-200 text-[#a8a8a8] hover:bg-[#181818] hover:text-white justify-center group nav-item" title="Novo Post">
                     <i data-lucide="plus-square" class="w-7 h-7 stroke-[2]"></i>
                     <span class="ml-4 text-lg font-medium sidebar-label">Novo Post</span>
                 </a>
@@ -269,7 +269,7 @@ session_start();
                     <i data-lucide="heart" class="w-7 h-7 stroke-[2]"></i>
                     <span class="ml-4 text-lg font-medium sidebar-label">Notificações</span>
                 </a>
-                <a href="pages/comunidades.hmtl" class="flex items-center h-[60px] w-full rounded-lg transition-colors duration-200 text-[#a8a8a8] hover:bg-[#181818] hover:text-white justify-center group nav-item" title="Comunidades">
+                <a href="pages/comunidades.html" class="flex items-center h-[60px] w-full rounded-lg transition-colors duration-200 text-[#a8a8a8] hover:bg-[#181818] hover:text-white justify-center group nav-item" title="Comunidades">
                     <i data-lucide="users" class="w-7 h-7 stroke-[2]"></i>
                     <span class="ml-4 text-lg font-medium sidebar-label">Comunidades</span>
                 </a>

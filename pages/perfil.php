@@ -93,25 +93,25 @@ $dados_usuario = $resultado->fetch_assoc();
             </a>
 
             <!-- Pesquisar -->
-            <a href="#" class="flex items-center h-[60px] w-full rounded-lg transition-colors duration-200 text-[#a8a8a8] hover:bg-[#181818] hover:text-white justify-center group nav-item" title="Pesquisar">
+            <a href="pesquisar_nseifazrisso.html" class="flex items-center h-[60px] w-full rounded-lg transition-colors duration-200 text-[#a8a8a8] hover:bg-[#181818] hover:text-white justify-center group nav-item" title="Pesquisar">
                 <i data-lucide="search" class="w-7 h-7 stroke-[2]"></i>
                 <span class="ml-4 text-lg font-medium sidebar-label">Pesquisar</span>
             </a>
 
             <!-- Novo Post -->
-            <a href="#" class="flex items-center h-[60px] w-full rounded-lg transition-colors duration-200 text-[#a8a8a8] hover:bg-[#181818] hover:text-white justify-center group nav-item" title="Novo Post">
+            <a href="criar_post.html" class="flex items-center h-[60px] w-full rounded-lg transition-colors duration-200 text-[#a8a8a8] hover:bg-[#181818] hover:text-white justify-center group nav-item" title="Novo Post">
                 <i data-lucide="plus-square" class="w-7 h-7 stroke-[2]"></i>
                 <span class="ml-4 text-lg font-medium sidebar-label">Novo Post</span>
             </a>
 
             <!-- Notificações -->
-            <a href="#" class="flex items-center h-[60px] w-full rounded-lg transition-colors duration-200 text-[#a8a8a8] hover:bg-[#181818] hover:text-white justify-center group nav-item" title="Notificações">
+            <a href="notificacoes.html" class="flex items-center h-[60px] w-full rounded-lg transition-colors duration-200 text-[#a8a8a8] hover:bg-[#181818] hover:text-white justify-center group nav-item" title="Notificações">
                 <i data-lucide="heart" class="w-7 h-7 stroke-[2]"></i>
                 <span class="ml-4 text-lg font-medium sidebar-label">Notificações</span>
             </a>
 
             <!-- Comunidades -->
-            <a href="#" class="flex items-center h-[60px] w-full rounded-lg transition-colors duration-200 text-[#a8a8a8] hover:bg-[#181818] hover:text-white justify-center group nav-item" title="Comunidades">
+            <a href="comunidades.html" class="flex items-center h-[60px] w-full rounded-lg transition-colors duration-200 text-[#a8a8a8] hover:bg-[#181818] hover:text-white justify-center group nav-item" title="Comunidades">
                 <i data-lucide="users" class="w-7 h-7 stroke-[2]"></i>
                 <span class="ml-4 text-lg font-medium sidebar-label">Comunidades</span>
             </a>
@@ -254,7 +254,7 @@ $dados_usuario = $resultado->fetch_assoc();
                 <!-- Rodapé do Card -->
                 <div class="border-t border-[#333] p-6 bg-[#1c1c1c] flex justify-end items-center gap-4">
                     <a href="../index.php" class="px-6 py-2.5 text-sm font-medium text-gray-400 hover:text-white transition-colors">Cancelar</a>
-                    <a href="#" class="px-6 py-2.5 text-sm font-bold bg-white text-black rounded-lg hover:bg-gray-200 transition-all shadow-[0_0_15px_rgba(255,255,255,0.1)]">Editar Perfil</a>
+                    <a href="#" id="editarPerfilBtn" class="px-6 py-2.5 text-sm font-bold bg-white text-black rounded-lg hover:bg-gray-200 transition-all shadow-[0_0_15px_rgba(255,255,255,0.1)]">Editar Perfil</a>
                 </div>
             </div>
 
@@ -297,6 +297,53 @@ $dados_usuario = $resultado->fetch_assoc();
                 }
             });
         }
+    </script>
+    <style>
+        /* Balão de 'Em desenvolvimento' */
+        .dev-bubble {
+            position: fixed;
+            top: 84px;
+            right: 24px;
+            background: rgba(255,255,255,0.06);
+            color: #fff;
+            padding: 10px 14px;
+            border-radius: 10px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.6);
+            font-size: 0.95rem;
+            opacity: 0;
+            transform: translateY(-6px);
+            transition: opacity 220ms ease, transform 220ms ease;
+            pointer-events: none;
+            z-index: 9999;
+        }
+        .dev-bubble.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    </style>
+
+    <script>
+        // Mostrar balão "Em desenvolvimento" ao clicar em Editar Perfil
+        (function(){
+            var btn = document.getElementById('editarPerfilBtn');
+            if(!btn) return;
+            btn.addEventListener('click', function(e){
+                e.preventDefault();
+                var bubble = document.getElementById('devBubble');
+                if(!bubble){
+                    bubble = document.createElement('div');
+                    bubble.id = 'devBubble';
+                    bubble.className = 'dev-bubble';
+                    bubble.textContent = 'Em desenvolvimento...';
+                    document.body.appendChild(bubble);
+                }
+                bubble.classList.add('show');
+                if(window._devBubbleTimeout) clearTimeout(window._devBubbleTimeout);
+                window._devBubbleTimeout = setTimeout(function(){
+                    bubble.classList.remove('show');
+                }, 2300);
+            });
+        })();
     </script>
 </body>
 </html>

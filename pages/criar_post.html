@@ -1,23 +1,273 @@
+
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <title>Novo Post</title>
-    <link rel="stylesheet" href="../css/estilo.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ifeed - Novo Post</title>
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <style>
+        /* Configurações Globais */
+        body { 
+            background-color: #000000; 
+            color: #e5e7eb; 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            overflow-x: hidden;
+        }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #000; }
+        ::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #555; }
+
+        /* Sidebar Transitions */
+        #sidebar { width: 80px; }
+        #sidebar.expanded { width: 260px; }
+
+        .sidebar-label {
+            opacity: 0;
+            display: none;
+            white-space: nowrap;
+            transition: opacity 0.2s ease-in-out;
+        }
+        .expanded .sidebar-label {
+            display: inline-block;
+            opacity: 1;
+        }
+
+        #main-container {
+            margin-left: 80px;
+            transition: margin-left 0.3s ease-in-out;
+        }
+        #main-container.expanded-margin { margin-left: 260px; }
+    </style>
 </head>
-<body>
-    <div class="main-content">
-        <h2>O que você está pensando?</h2>
-        <form action="../index.html">
-            <textarea name="conteudo" rows="5" placeholder="Escreva seu post aqui..."></textarea>
+<body class="min-h-screen flex flex-col">
+
+    <!-- ================= SIDEBAR ================= -->
+    <nav id="sidebar" class="fixed top-0 left-0 h-full bg-black border-r border-[#262626] z-50 flex flex-col justify-between py-5 transition-all duration-300 ease-in-out">
+        
+        <div class="flex flex-col w-full px-2 space-y-2">
+            <!-- Início -->
+            <a href="../index.php" class="flex items-center h-[60px] w-full rounded-lg transition-colors duration-200 text-[#a8a8a8] hover:bg-[#181818] hover:text-white justify-center group nav-item" title="Página Inicial">
+                <i data-lucide="home" class="w-7 h-7 stroke-[2]"></i>
+                <span class="ml-4 text-lg font-medium sidebar-label">Página Inicial</span>
+            </a>
+
+            <!-- Pesquisar -->
+            <a href="pesquisar_nseifazrisso.html" class="flex items-center h-[60px] w-full rounded-lg transition-colors duration-200 text-[#a8a8a8] hover:bg-[#181818] hover:text-white justify-center group nav-item" title="Pesquisar">
+                <i data-lucide="search" class="w-7 h-7 stroke-[2]"></i>
+                <span class="ml-4 text-lg font-medium sidebar-label">Pesquisar</span>
+            </a>
+
+            <!-- Novo Post (ATIVO) -->
+            <a href="criar_post.html" class="flex items-center h-[60px] w-full rounded-lg transition-colors duration-200 text-white bg-[#202020] justify-center group nav-item" title="Novo Post">
+                <i data-lucide="plus-square" class="w-7 h-7 stroke-[2.5]"></i>
+                <span class="ml-4 text-lg font-medium sidebar-label">Novo Post</span>
+            </a>
+
+            <!-- Notificações -->
+            <a href="notificacoes.html" class="flex items-center h-[60px] w-full rounded-lg transition-colors duration-200 text-[#a8a8a8] hover:bg-[#181818] hover:text-white justify-center group nav-item" title="Notificações">
+                <i data-lucide="heart" class="w-7 h-7 stroke-[2]"></i>
+                <span class="ml-4 text-lg font-medium sidebar-label">Notificações</span>
+            </a>
+
+            <!-- Comunidades -->
+            <a href="comunidades.html" class="flex items-center h-[60px] w-full rounded-lg transition-colors duration-200 text-[#a8a8a8] hover:bg-[#181818] hover:text-white justify-center group nav-item" title="Comunidades">
+                <i data-lucide="users" class="w-7 h-7 stroke-[2]"></i>
+                <span class="ml-4 text-lg font-medium sidebar-label">Comunidades</span>
+            </a>
+
+            <!-- Perfil -->
+            <a href="perfil.php" class="flex items-center h-[60px] w-full rounded-lg transition-colors duration-200 text-[#a8a8a8] hover:bg-[#181818] hover:text-white justify-center group nav-item" title="Perfil">
+                <i data-lucide="user-circle-2" class="w-7 h-7 stroke-[2]"></i>
+                <span class="ml-4 text-lg font-medium sidebar-label">Perfil</span>
+            </a>
+        </div>
+
+        <div class="flex flex-col w-full px-2 space-y-2 mb-2">
+            <a href="../php/sair.php" class="flex items-center h-[60px] w-full rounded-lg transition-colors duration-200 text-[#a8a8a8] hover:bg-[#181818] hover:text-white justify-center group nav-item" title="Sair">
+                <i data-lucide="log-out" class="w-7 h-7 stroke-[2]"></i>
+                <span class="ml-4 text-lg font-medium sidebar-label">Sair</span>
+            </a>
+            <button id="toggleBtn" class="flex items-center justify-center h-[60px] w-full rounded-lg transition-colors duration-200 text-[#a8a8a8] hover:bg-[#181818] hover:text-white outline-none">
+                <i data-lucide="menu" class="w-7 h-7 stroke-[2]"></i>
+                <span class="ml-4 text-lg font-medium sidebar-label">Recolher</span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- ================= MAIN CONTENT ================= -->
+    <div id="main-container" class="flex-grow flex flex-col min-h-screen">
+        
+        <!-- HEADER -->
+        <header class="h-[60px] w-full bg-black border-b border-[#262626] flex items-center justify-between px-6 sticky top-0 z-40">
+            <div class="w-20"></div>
+            <h1 class="text-white text-xl font-semibold tracking-wide">Criar Publicação</h1>
+            <div class="w-20"></div>
+        </header>
+
+        <!-- CONTEÚDO DO POST -->
+        <main class="flex-grow flex items-start justify-center p-6 md:p-10">
             
-            <label for="foto">Adicionar Foto:</label>
-            <input type="file" name="foto_post" accept="image/*">
-            
-            <br><br>
-            <button type="submit" class="btn-postar">Publicar</button>
-            <a href="../index.html" class="btn-cancelar">Cancelar</a>
-        </form>
+            <!-- Post Card Form -->
+            <div class="w-full max-w-2xl bg-[#1E1E1E] border border-[#333] rounded-2xl overflow-hidden shadow-2xl">
+                
+                <!-- PHP Form -->
+                <form action="process_post.php" method="POST" enctype="multipart/form-data" class="w-full">
+                    
+                    <!-- Cabeçalho do Card (Usuário) -->
+                    <div class="flex items-center p-6 pb-2">
+                        <div class="w-12 h-12 rounded-full overflow-hidden border-2 border-[#333] mr-4">
+                            <img src="https://picsum.photos/id/64/200/200" alt="User Avatar" class="w-full h-full object-cover">
+                        </div>
+                        <div>
+                            <p class="text-white font-semibold text-lg">Carlos Eduardo</p>
+                            <div class="flex items-center gap-2">
+                                <span class="text-[#888] text-sm">@carlos_ifeed</span>
+                                <span class="text-[#444] text-xs">•</span>
+                                <div class="flex items-center text-[#888] text-xs bg-[#2a2a2a] px-2 py-0.5 rounded-full border border-[#333] cursor-pointer hover:text-white transition-colors">
+                                    <i data-lucide="globe" class="w-3 h-3 mr-1"></i>
+                                    Público
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Área de Texto -->
+                    <div class="px-6 py-2">
+                        <textarea 
+                            name="post_content" 
+                            rows="4" 
+                            placeholder="No que você está pensando hoje?" 
+                            class="w-full bg-transparent text-white text-xl placeholder-[#555] border-none focus:ring-0 resize-none outline-none leading-relaxed scrollbar-none"
+                        ></textarea>
+                    </div>
+
+                    <!-- Preview de Mídia (Hidden by default) -->
+                    <div id="mediaPreviewContainer" class="px-6 pb-4 hidden relative">
+                        <div class="relative rounded-xl overflow-hidden border border-[#333] bg-black">
+                            <img id="imagePreview" class="w-full max-h-[400px] object-cover hidden" />
+                            <video id="videoPreview" class="w-full max-h-[400px] hidden" controls></video>
+                            
+                            <!-- Botão Remover Mídia -->
+                            <button type="button" id="removeMediaBtn" class="absolute top-3 right-3 bg-black/70 text-white p-2 rounded-full hover:bg-black/90 transition-colors backdrop-blur-md">
+                                <i data-lucide="x" class="w-5 h-5"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Barra de Ferramentas e Ações -->
+                    <div class="p-4 mx-2 mb-2 mt-2 border-t border-[#2a2a2a] flex items-center justify-between bg-[#1E1E1E]">
+                        
+                        <!-- Add Media Icons -->
+                        <div class="flex items-center space-x-2">
+                            <!-- Imagem Upload -->
+                            <div class="relative group">
+                                <input type="file" id="imageUpload" name="post_image" accept="image/*" class="hidden" onchange="previewMedia(event, 'image')">
+                                <label for="imageUpload" class="p-2.5 text-[#a8a8a8] hover:text-[#4ADE80] hover:bg-[#4ADE80]/10 rounded-full cursor-pointer transition-all flex items-center justify-center" title="Adicionar Foto">
+                                    <i data-lucide="image" class="w-6 h-6"></i>
+                                </label>
+                            </div>
+
+                            <!-- Vídeo Upload (Exemplo) -->
+                            <div class="relative group">
+                                <input type="file" id="videoUpload" name="post_video" accept="video/*" class="hidden" onchange="previewMedia(event, 'video')">
+                                <label for="videoUpload" class="p-2.5 text-[#a8a8a8] hover:text-[#3B82F6] hover:bg-[#3B82F6]/10 rounded-full cursor-pointer transition-all flex items-center justify-center" title="Adicionar Vídeo">
+                                    <i data-lucide="video" class="w-6 h-6"></i>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="flex items-center gap-3">
+                            <!-- Separator Vertical -->
+                            <div class="h-8 w-[1px] bg-[#333] mx-2 hidden md:block"></div>
+                            
+                            <button type="submit" class="bg-white text-black font-bold py-2 px-8 rounded-lg hover:bg-gray-200 transition-all shadow-[0_0_15px_rgba(255,255,255,0.1)] flex items-center gap-2">
+                                Publicar
+                                <i data-lucide="send" class="w-4 h-4 ml-1"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                </form>
+            </div>
+        </main>
     </div>
+
+    <!-- JAVASCRIPT -->
+    <script>
+        lucide.createIcons();
+
+        // Sidebar Logic
+        const sidebar = document.getElementById('sidebar');
+        const mainContainer = document.getElementById('main-container');
+        const toggleBtn = document.getElementById('toggleBtn');
+        const navItems = document.querySelectorAll('.nav-item');
+
+        toggleBtn.addEventListener('click', () => {
+            const isExpanded = sidebar.classList.toggle('expanded');
+            if (isExpanded) {
+                mainContainer.classList.add('expanded-margin');
+                navItems.forEach(item => {
+                    item.classList.remove('justify-center');
+                    item.classList.add('justify-start', 'px-4');
+                });
+            } else {
+                mainContainer.classList.remove('expanded-margin');
+                navItems.forEach(item => {
+                    item.classList.remove('justify-start', 'px-4');
+                    item.classList.add('justify-center');
+                });
+            }
+        });
+
+        // Media Preview Logic
+        const mediaContainer = document.getElementById('mediaPreviewContainer');
+        const imagePreview = document.getElementById('imagePreview');
+        const videoPreview = document.getElementById('videoPreview');
+        const removeBtn = document.getElementById('removeMediaBtn');
+        const imageInput = document.getElementById('imageUpload');
+        const videoInput = document.getElementById('videoUpload');
+
+        function previewMedia(event, type) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                mediaContainer.classList.remove('hidden');
+                
+                if (type === 'image') {
+                    imagePreview.src = e.target.result;
+                    imagePreview.classList.remove('hidden');
+                    videoPreview.classList.add('hidden');
+                    videoInput.value = ''; // Clear video input if image selected
+                } else if (type === 'video') {
+                    videoPreview.src = e.target.result;
+                    videoPreview.classList.remove('hidden');
+                    imagePreview.classList.add('hidden');
+                    imageInput.value = ''; // Clear image input if video selected
+                }
+            };
+            reader.readAsDataURL(file);
+        }
+
+        removeBtn.addEventListener('click', () => {
+            mediaContainer.classList.add('hidden');
+            imagePreview.src = '';
+            videoPreview.src = '';
+            imageInput.value = '';
+            videoInput.value = '';
+        });
+    </script>
 </body>
 </html>
