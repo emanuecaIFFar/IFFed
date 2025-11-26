@@ -141,7 +141,7 @@ Exemplos importantes:
 - Exibição de foto no perfil:
 
 ```php
-<img src="../assets_front/img/<?php echo $dados_usuario['foto']; ?>" alt="Foto de Perfil">
+<img src="../assets/<?php echo $dados_usuario['foto']; ?>" alt="Foto de Perfil">
 ```
 
 ## Boas práticas e próximos passos
@@ -194,7 +194,7 @@ Todas as páginas/ endpoints que exigem autenticação devem chamar `session_sta
     1. `session_start()` (opcional, apenas se desejar logar automaticamente após cadastro).
     2. Receber campos via `$_POST` e arquivo via `$_FILES` (se houver upload de foto).
     3. Validar entradas (email único, formato, senha forte).
-    4. Mover arquivo para `assets_front/img/uploads/` com nome seguro e salvar nome no campo `foto` (ex.: `time() . '_' . $userId . '.' . $ext`).
+    4. Mover arquivo para `assets/uploads/` com nome seguro e salvar nome no campo `foto` (ex.: `time() . '_' . $userId . '.' . $ext`).
     5. Inserir registro em `perfil`.
     6. Redirecionar com `?sucesso=cadastrado` ou mensagem de erro.
 
@@ -206,6 +206,38 @@ Todas as páginas/ endpoints que exigem autenticação devem chamar `session_sta
   - Responsabilidade: handler separado para testar upload de foto. Deve validar tipo/ tamanho e devolver sucesso/erro.
 
 Observação: podem existir arquivos adicionais em `php/` com lógicas específicas; os nomes acima são os principais lidos pelo front-end atual.
+
+## API unificada (arquivo `php/api.php`)
+
+Para simplificar a explicação e o desenvolvimento do front-end, foi criado um arquivo chamado `php/api.php` que reúne pequenos endpoints que retornam JSON. A ideia é concentrar ações de integração (principalmente relacionadas a notificações e dados de sessão) em um único lugar, mantendo as URLs antigas funcionais através de "wrappers".
+
+O que foi unido:
+- `get_notifications` — retorna as notificações do usuário (disponível via `php/get_notifications.php` ou `php/api.php?action=get_notifications`).
+- `mark_notifications_read` — marca notificações como lidas (`php/mark_notifications_read.php` ou `php/api.php?action=mark_notifications_read`).
+- `get_session_user` — retorna id, nome e `foto_url` do usuário logado (`php/get_session_user.php` ou `php/api.php?action=get_session_user`).
+
+Por que fizemos essa junção:
+- Menos arquivos pequenos espalhados pelo projeto facilita a apresentação e o entendimento do fluxo.
+- Centralizar o retorno JSON reduz duplicação (checagem de sessão, conexão, normalização de `foto`) e facilita manutenção.
+- As rotas antigas foram mantidas como wrappers (arquivos que apenas invocam `api.php?action=...`) para não quebrar o front existente.
+
+Exemplo de uso (fetch no front-end):
+
+```js
+// Buscar notificações (GET)
+fetch('/php/api.php?action=get_notifications', { credentials: 'same-origin' })
+  .then(r => r.json())
+  .then(json => console.log(json));
+
+// Marcar todas como lidas (POST)
+fetch('/php/api.php?action=mark_notifications_read', {
+  method: 'POST',
+  credentials: 'same-origin',
+  body: new URLSearchParams({ all: 1 })
+}).then(r => r.json()).then(console.log);
+```
+
+Observação: se preferir, o front pode continuar chamando `php/get_notifications.php` e `php/mark_notifications_read.php` — os wrappers vão encaminhar para `api.php` automaticamente.
 
 ---
 
@@ -254,7 +286,7 @@ header('Location: ../pages/login.php?erro=credenciais');
 - Ação do servidor:
   - Validar campos obrigatórios.
   - Checar duplicidade de e-mail.
-  - Processar `$_FILES['foto_perfil']`: validar MIME, tamanho e mover para `assets_front/img/uploads/` com nome seguro.
+  - Processar `$_FILES['foto_perfil']`: validar MIME, tamanho e mover para `assets/uploads/` com nome seguro.
   - Inserir novo registro em `perfil` (armazenar o nome do arquivo no campo `foto`).
   - Redirecionar para `pages/login.php?sucesso=cadastrado` ou logar automaticamente.
 

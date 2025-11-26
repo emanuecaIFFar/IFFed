@@ -34,7 +34,7 @@ if(!in_array($ext, $ext_permitidas)){
 }
 
 // Pasta destino (relativa ao arquivo php/upload_foto_teste.php)
-$pasta_destino = __DIR__ . '/../assets_front/img/uploads/';
+$pasta_destino = __DIR__ . '/../assets/uploads/';
 if(!is_dir($pasta_destino)){
     mkdir($pasta_destino, 0755, true);
 }
@@ -48,7 +48,7 @@ $caminho_completo = $pasta_destino . $novo_nome;
 if(move_uploaded_file($arquivo['tmp_name'], $caminho_completo)){
     // Salvar caminho relativo no banco (uploads/nome)
     // IMPORTANTE: aqui movemos o arquivo para o diretório físico
-    // `assets_front/img/uploads/` e salvamos no banco apenas o caminho
+    // `assets/uploads/` e salvamos no banco apenas o caminho
     // relativo `uploads/<nome>`. A imagem em si fica no disco, não no DB.
     $nome_arquivo_bd = 'uploads/' . $novo_nome;
 

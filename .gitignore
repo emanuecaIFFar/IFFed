@@ -1,0 +1,12 @@
+# Ignore uploaded user images
+/assets/uploads/*
+# keep the uploads folder tracked (optional)
+!/assets/uploads/.gitkeep
+
+# Ignore old upload folder (if exists)
+/assets_front/img/uploads/*
+
+# Node / IDE / OS
+.DS_Store
+Thumbs.db
+/.vscode/

@@ -24,12 +24,12 @@ if(isset($_FILES['foto_perfil']) && $_FILES['foto_perfil']['error'] == 0) {
     
     // PASTA DE DESTINO (sistema de arquivos):
     // As imagens são salvas fisicamente em disco dentro da pasta
-    // `assets_front/img/uploads/` (relativa à raiz do projeto).
+    // `assets/uploads/` (relativa à raiz do projeto).
     // No banco de dados será salvo apenas o caminho relativo (string),
     // por exemplo: "uploads/63a1b2c3_imagem.jpg".
     // Isso significa que o binário da imagem NÃO é guardado no MySQL,
     // apenas o caminho para encontrá-la no servidor.
-    $pasta_destino = "../assets_front/img/uploads/";
+    $pasta_destino = "../assets/uploads/";
     
     // Move o arquivo da pasta temporária do XAMPP para a nossa pasta
     if(move_uploaded_file($arquivo['tmp_name'], $pasta_destino . $novo_nome)) {

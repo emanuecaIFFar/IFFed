@@ -51,7 +51,7 @@ try {
 
     // Remove arquivo de imagem associado, se houver
     if (!empty($row['imagem'])) {
-        $f = __DIR__ . '/../assets_front/img/uploads/' . $row['imagem'];
+        $f = __DIR__ . '/../assets/uploads/' . $row['imagem'];
         if (file_exists($f)) @unlink($f);
     }
 

@@ -19,14 +19,14 @@ $dados_usuario = $resultado->fetch_assoc();
 
 // Normaliza caminho da foto para uso nas views
 $foto_val = $dados_usuario['foto'] ?? '';
-if (empty($foto_val)) {
-    $foto_path = '../assets_front/img/padrao.jpg';
+       if (empty($foto_val)) {
+           $foto_path = '../assets/img/padrao.jpg';
 } elseif (strpos($foto_val, 'uploads/') === 0) {
-    $foto_path = '../assets_front/img/' . $foto_val; // já armazena 'uploads/nome.jpg'
+    $foto_path = '../assets/' . $foto_val; // já armazena 'uploads/nome.jpg'
 } elseif (strpos($foto_val, 'assets_front') !== false || strpos($foto_val, 'http') === 0) {
     $foto_path = $foto_val;
 } else {
-    $foto_path = '../assets_front/img/uploads/' . $foto_val; // só o nome do arquivo
+    $foto_path = '../assets/uploads/' . $foto_val; // só o nome do arquivo
 }
 
 ?>
@@ -117,7 +117,7 @@ if (empty($foto_val)) {
             </a>
 
             <!-- Notificações -->
-            <a href="notificacoes.html" class="flex items-center h-[60px] w-full rounded-lg transition-colors duration-200 text-[#a8a8a8] hover:bg-[#181818] hover:text-white justify-center group nav-item" title="Notificações">
+            <a href="notificacoes.php" class="flex items-center h-[60px] w-full rounded-lg transition-colors duration-200 text-[#a8a8a8] hover:bg-[#181818] hover:text-white justify-center group nav-item" title="Notificações">
                 <i data-lucide="heart" class="w-7 h-7 stroke-[2]"></i>
                 <span class="ml-4 text-lg font-medium sidebar-label">Notificações</span>
             </a>
@@ -196,7 +196,7 @@ if (empty($foto_val)) {
                                         src="<?php echo $foto_path; ?>" 
                                         alt="Profile Avatar" 
                                         class="w-full h-full object-cover opacity-90 group-hover:opacity-100 transition-opacity"
-                                        onerror="this.onerror=null;this.src='../assets_front/img/padrao.jpg';"
+                                        onerror="this.onerror=null;this.src='../assets/img/padrao.jpg';"
                                     />
                                 </div>
                                 <button 
@@ -287,13 +287,13 @@ if (empty($foto_val)) {
                     $res2 = $stmt->get_result();
                     while($p = $res2->fetch_assoc()) {
                         $p_conteudo = nl2br(htmlspecialchars($p['conteudo_textual']));
-                        $p_img = $p['imagem'] ? '../assets_front/img/uploads/' . $p['imagem'] : null;
+                        $p_img = $p['imagem'] ? '../assets/uploads/' . $p['imagem'] : null;
                         $p_data = date('d/m/Y H:i', strtotime($p['data_criacao']));
                     ?>
                     <div class="bg-[#1E1E1E] border border-[#333] rounded-lg p-3">
                         <div class="flex items-start gap-3">
                             <div style="width:44px; height:44px; overflow:hidden; border-radius:50%;">
-                                <img src="<?php echo $foto_path; ?>" alt="Avatar" style="width:100%; height:100%; object-fit:cover;" onerror="this.onerror=null;this.src='../assets_front/img/padrao.jpg';">
+                                <img src="<?php echo $foto_path; ?>" alt="Avatar" style="width:100%; height:100%; object-fit:cover;" onerror="this.onerror=null;this.src='../assets/img/padrao.jpg';">
                             </div>
                             <div class="flex-grow">
                                 <div class="text-white font-semibold"><?php echo htmlspecialchars($dados_usuario['nome'] ?: $_SESSION['nome_usuario']); ?></div>

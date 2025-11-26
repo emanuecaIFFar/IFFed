@@ -39,7 +39,7 @@ if (!empty($_FILES['imagem']['name'])) {
             header('Location: ../pages/criar_post.html'); exit;
         }
         $ext = $allowed[$mime];
-        $uploadsDir = __DIR__ . '/../assets_front/img/uploads/';
+        $uploadsDir = __DIR__ . '/../assets/uploads/';
         if (!is_dir($uploadsDir)) mkdir($uploadsDir, 0755, true);
         $imagem_nome = time() . '_' . $user_id . '.' . $ext;
         $dest = $uploadsDir . $imagem_nome;

@@ -1,4 +1,8 @@
 <?php
+// Habilita saída de erros para diagnóstico local (remova em produção)
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
 session_start();
 ?>
 <!DOCTYPE html>
@@ -273,7 +277,7 @@ session_start();
                     <i data-lucide="plus-square" class="w-7 h-7 stroke-[2]"></i>
                     <span class="ml-4 text-lg font-medium sidebar-label">Novo Post</span>
                 </a>
-                <a href="pages/notificacoes.html" class="flex items-center h-[60px] w-full rounded-lg transition-colors duration-200 text-[#a8a8a8] hover:bg-[#181818] hover:text-white justify-center group nav-item" title="Notificações">
+                    <a href="pages/notificacoes.php" class="flex items-center h-[60px] w-full rounded-lg transition-colors duration-200 text-[#a8a8a8] hover:bg-[#181818] hover:text-white justify-center group nav-item" title="Notificações">
                     <i data-lucide="heart" class="w-7 h-7 stroke-[2]"></i>
                     <span class="ml-4 text-lg font-medium sidebar-label">Notificações</span>
                 </a>
@@ -312,37 +316,66 @@ session_start();
                     // Carrega posts mais recentes e mostra no feed
                     require_once __DIR__ . '/php/conexao.php';
 
-                    $sql = "SELECT p.id, p.conteudo_textual, p.imagem, p.data_criacao, p.num_comentarios, p.num_curtidas, u.id AS usuario_id, u.nome, u.foto
+                        $current_user = isset($_SESSION['id']) ? intval($_SESSION['id']) : 0;
+                        $sql = "SELECT p.id, p.conteudo_textual, p.imagem, p.data_criacao, p.num_comentarios, p.num_curtidas, u.id AS usuario_id, u.nome, u.foto,
+                               EXISTS(SELECT 1 FROM curtidas c WHERE c.id_postagem = p.id AND c.id_usuario = $current_user) AS liked
                             FROM postagens p
                             LEFT JOIN perfil u ON p.id_usuario = u.id
                             ORDER BY p.data_criacao DESC
                             LIMIT 50";
 
                     if ($res = $conn->query($sql)) {
+                        // Carrega dados do usuário atual para usar no input de comentário
+                        $sessionUserFoto = 'assets/img/padrao.jpg';
+                        $sessionUserName = '';
+                        if ($current_user) {
+                            $stmU = $conn->prepare('SELECT nome, foto FROM perfil WHERE id = ? LIMIT 1');
+                            if ($stmU) {
+                                $stmU->bind_param('i', $current_user);
+                                $stmU->execute();
+                                $stmU->bind_result($u_nome, $u_foto);
+                                if ($stmU->fetch()) {
+                                    $sessionUserName = $u_nome ?? '';
+                                    $sf = $u_foto ?? '';
+                                    if (empty($sf)) {
+                                        $sessionUserFoto = 'assets/img/padrao.jpg';
+                                    } elseif (strpos($sf, 'uploads/') === 0) {
+                                        $sessionUserFoto = 'assets/' . $sf;
+                                    } elseif (strpos($sf, 'assets_front') !== false || strpos($sf, 'http') === 0) {
+                                        $sessionUserFoto = $sf;
+                                    } else {
+                                        $sessionUserFoto = 'assets/uploads/' . $sf;
+                                    }
+                                }
+                                $stmU->close();
+                            }
+                        }
+
                         while ($row = $res->fetch_assoc()) {
                             $autorNome = htmlspecialchars($row['nome'] ?? 'Usuário');
                             $foto = $row['foto'] ?? '';
                             if (empty($foto)) {
-                                $autorFoto = 'assets_front/img/padrao.jpg';
+                                $autorFoto = 'assets/img/padrao.jpg';
                             } elseif (strpos($foto, 'uploads/') === 0) {
-                                $autorFoto = 'assets_front/img/' . $foto; // foto já guarda 'uploads/arquivo.jpg'
+                                $autorFoto = 'assets/' . $foto; // foto já guarda 'uploads/arquivo.jpg'
                             } elseif (strpos($foto, 'assets_front') !== false || strpos($foto, 'http') === 0) {
                                 $autorFoto = $foto;
                             } else {
-                                $autorFoto = 'assets_front/img/uploads/' . $foto; // nome simples
+                                $autorFoto = 'assets/uploads/' . $foto; // nome simples
                             }
                             $conteudo = nl2br(htmlspecialchars($row['conteudo_textual']));
-                            $imagem = $row['imagem'] ? 'assets_front/img/uploads/' . $row['imagem'] : null;
+                            $imagem = $row['imagem'] ? 'assets/uploads/' . $row['imagem'] : null;
                             $data = date('d/m/Y H:i', strtotime($row['data_criacao']));
                             $num_curtidas = intval($row['num_curtidas']);
                             $num_comentarios = intval($row['num_comentarios']);
+                            $liked = !empty($row['liked']);
                     ?>
 
                     <div class="col-sm-12 col-md-6 col-lg-4 mb-4">
                         <div class="card h-100">
                             <div class="card-header d-flex align-items-center">
                                     <div class="me-3" style="width:44px; height:44px; overflow:hidden; border-radius:50%;">
-                                    <img src="<?php echo $autorFoto; ?>" alt="Avatar" style="width:100%; height:100%; object-fit:cover;" onerror="this.onerror=null;this.src='assets_front/img/padrao.jpg';">
+                                    <img src="<?php echo $autorFoto; ?>" alt="Avatar" style="width:100%; height:100%; object-fit:cover;" onerror="this.onerror=null;this.src='assets/img/padrao.jpg';">
                                 </div>
                                 <div class="flex-grow-1">
                                     <div class="card-title mb-0"><?php echo $autorNome; ?></div>
@@ -359,16 +392,41 @@ session_start();
                             </div>
 
                             <div class="card-footer post-actions d-flex align-items-center justify-content-between">
-                                <div>
-                                    <i class="bi bi-heart" title="Curtir"></i>
-                                    <span class="ms-2"><?php echo $num_curtidas; ?></span>
-                                    <i class="bi bi-chat ms-3" title="Comentar"></i>
-                                    <span class="ms-2"><?php echo $num_comentarios; ?></span>
+                                <div class="d-flex align-items-center">
+                                    <button class="btn-like btn btn-link text-decoration-none p-0" data-post-id="<?php echo $row['id']; ?>" aria-label="Curtir">
+                                        <i class="bi <?php echo $liked ? 'bi-heart-fill text-danger' : 'bi-heart'; ?> like-icon" ></i>
+                                    </button>
+                                    <span class="ms-2 like-count"><?php echo $num_curtidas; ?></span>
+
+                                    <button class="btn-comment btn btn-link text-decoration-none p-0 ms-3" data-post-id="<?php echo $row['id']; ?>" aria-label="Comentar">
+                                        <i class="bi bi-chat"></i>
+                                    </button>
+                                    <span class="ms-2 comment-count"><?php echo $num_comentarios; ?></span>
                                 </div>
                                 <div>
                                     <i class="bi bi-send" title="Compartilhar"></i>
                                 </div>
                             </div>
+
+                            <!-- Painel de comentários (oculto por padrão) -->
+                            <div id="comments-panel-<?php echo $row['id']; ?>" class="comments-panel" style="display:none;border-top:1px solid #2b2b2b;background:#0f0f0f;padding:12px;">
+                                <div class="comments-list" style="max-height:220px;overflow:auto;padding-right:6px;">
+                                        <!-- Comentários carregados via AJAX quando o painel for aberto -->
+                                        <div class="text-muted" style="font-size:0.95rem;padding:8px 4px;">Clique no ícone de comentário para abrir e carregar os comentários.</div>
+                                    </div>
+
+                                <!-- Input para novo comentário -->
+                                <div class="mt-2 d-flex align-items-start comment-input">
+                                    <div style="width:40px;height:40px;overflow:hidden;border-radius:50%;margin-right:8px;flex:0 0 40px;">
+                                        <img src="<?php echo $sessionUserFoto; ?>" alt="sua foto" style="width:100%;height:100%;object-fit:cover;" onerror="this.src='assets/img/padrao.jpg'">
+                                    </div>
+                                    <div style="flex:1;display:flex;gap:8px;">
+                                        <input type="text" class="form-control form-control-sm comment-text-input" placeholder="Adicione um comentário..." />
+                                        <button class="btn btn-sm btn-primary btn-send-comment" data-post-id="<?php echo $row['id']; ?>">Enviar</button>
+                                    </div>
+                                </div>
+                            </div>
+
                         </div>
                     </div>
 
@@ -387,7 +445,7 @@ session_start();
 
             <script>
                 // Inicializa os ícones Lucide
-                if (window.lucide) lucide.createIcons();
+                    if (window.lucide) lucide.createIcons();
 
                 // Lógica da nova Sidebar (toggle expand/collapse)
                 (function(){
@@ -413,6 +471,155 @@ session_start();
                                 item.classList.add('justify-center');
                             });
                         }
+                    });
+                })();
+            </script>
+            <script>
+                // Dados do usuário logado para usar ao inserir comentários dinamicamente
+                var SESSION_USER = <?php echo json_encode([ 'id' => $current_user, 'name' => $sessionUserName, 'foto' => $sessionUserFoto ]); ?>;
+            </script>
+            <script>
+                // Funções de interatividade: curtir e comentar via AJAX
+                (function(){
+                    // Escapa HTML para evitar XSS ao inserir comentários dinamicamente
+                    function escapeHtml(str){
+                        if (!str) return '';
+                        return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;');
+                    }
+                    // Curtir / Descurtir (delegação + logs de depuração)
+                    document.addEventListener('click', function(e){
+                        var btn = e.target.closest ? e.target.closest('.btn-like') : null;
+                        if (!btn) return;
+                        e.preventDefault();
+                        // Debug: mostre o post id no console
+                        var postId = btn.getAttribute('data-post-id');
+                        console.debug('Curtir clicado, postId=', postId);
+
+                        // Evita cliques rápidos duplicados
+                        if (btn.dataset.disabled === '1') {
+                            console.debug('Clique ignorado (aguardando resposta) para post', postId);
+                            return;
+                        }
+                        btn.dataset.disabled = '1';
+
+                        var icon = btn.querySelector('.like-icon') || document.querySelector('.btn-like[data-post-id="' + postId + '"] .like-icon');
+                        var card = btn.closest('.card');
+                        var countEl = card ? card.querySelector('.like-count') : btn.parentElement.querySelector('.like-count');
+
+                        var form = new FormData();
+                        form.append('post_id', postId);
+
+                        fetch('php/like.php', { method: 'POST', credentials: 'same-origin', body: form })
+                            .then(function(r){ return r.json().catch(function(){ return { success: false, rawStatus: r.status }; }); })
+                            .then(function(json){
+                                btn.dataset.disabled = '0';
+                                console.debug('Resposta like.php para post', postId, json);
+                                if (!json || !json.success) return;
+                                if (countEl) countEl.textContent = json.total;
+                                if (icon) {
+                                    if (json.action === 'liked') {
+                                        icon.classList.remove('bi-heart');
+                                        icon.classList.add('bi-heart-fill', 'text-danger');
+                                    } else {
+                                        icon.classList.remove('bi-heart-fill', 'text-danger');
+                                        icon.classList.add('bi-heart');
+                                    }
+                                }
+                            }).catch(function(err){
+                                console.error('Erro ao chamar like.php', err);
+                                btn.dataset.disabled = '0';
+                            });
+                    });
+
+                    // Comentar: abre/fecha painel de comentários e envia comentário inline
+                    document.querySelectorAll('.btn-comment').forEach(function(btn){
+                        btn.addEventListener('click', function(e){
+                            e.preventDefault();
+                            var postId = this.getAttribute('data-post-id');
+                            var panel = document.getElementById('comments-panel-' + postId);
+                            if (!panel) return;
+                            var isHidden = panel.style.display === 'none' || panel.style.display === '';
+                            if (isHidden) {
+                                panel.style.display = 'block';
+                                var cl = panel.querySelector('.comments-list');
+                                if (cl && !cl.dataset.loaded) {
+                                    // Carrega comentários via AJAX
+                                    cl.innerHTML = '<div class="text-muted" style="padding:8px">Carregando comentários...</div>';
+                                    fetch('php/get_comments.php?post_id=' + encodeURIComponent(postId), { credentials: 'same-origin' })
+                                        .then(r => r.json())
+                                        .then(json => {
+                                            if (!json.success) {
+                                                cl.innerHTML = '<div class="text-danger" style="padding:8px">Erro ao carregar.</div>';
+                                                return;
+                                            }
+                                            cl.innerHTML = '';
+                                            json.data.forEach(function(c){
+                                                var div = document.createElement('div');
+                                                div.className = 'd-flex align-items-start mb-2';
+                                                div.innerHTML = '<div style="width:36px;height:36px;border-radius:50%;overflow:hidden;margin-right:8px;flex:0 0 36px;"><img src="'+escapeHtml(c.autor_foto)+'" alt="avatar" style="width:100%;height:100%;object-fit:cover;" onerror="this.src=\'assets/img/padrao.jpg\'"></div>'+
+                                                    '<div style="flex:1;"><div style="font-size:0.95rem;color:#eaeaea;font-weight:600;">'+escapeHtml(c.autor_nome)+' <small style="color:#9a9a9a;font-weight:400;margin-left:6px;font-size:0.85rem;">'+escapeHtml(new Date(c.data_criacao).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }))+'</small></div><div style="color:#d1d1d1;font-size:0.95rem;">'+escapeHtml(c.conteudo).replace(/\n/g,'<br>')+'</div></div>';
+                                                cl.appendChild(div);
+                                            });
+                                            cl.dataset.loaded = '1';
+                                            cl.scrollTop = cl.scrollHeight;
+                                        }).catch(function(){ cl.innerHTML = '<div class="text-danger" style="padding:8px">Erro de rede.</div>'; });
+                                }
+                                var inp = panel.querySelector('.comment-text-input');
+                                if (inp) inp.focus();
+                            } else {
+                                panel.style.display = 'none';
+                            }
+                        });
+                    });
+
+                    // Envio de comentário (delegado) - busca botões com classe .btn-send-comment
+                    document.addEventListener('click', function(e){
+                        var target = e.target.closest ? e.target.closest('.btn-send-comment') : null;
+                        if (!target) return;
+                        e.preventDefault();
+                        var postId = target.getAttribute('data-post-id');
+                        var panel = document.getElementById('comments-panel-' + postId);
+                        if (!panel) return;
+                        var input = panel.querySelector('.comment-text-input');
+                        if (!input) return;
+                        var text = input.value.trim();
+                        if (!text) return;
+                        var form = new FormData();
+                        form.append('conteudo', text);
+                        form.append('id_postagem', postId);
+                        target.disabled = true;
+                        fetch('php/comment.php', { method: 'POST', credentials: 'same-origin', body: form })
+                            .then(r => r.json())
+                            .then(json => {
+                                target.disabled = false;
+                                if (!json.success) {
+                                    alert('Erro ao enviar comentário');
+                                    return;
+                                }
+                                // Monta bloco do comentário com dados do SESSION_USER
+                                var cl = panel.querySelector('.comments-list');
+                                var div = document.createElement('div');
+                                div.className = 'd-flex align-items-start mb-2';
+                                var foto = (SESSION_USER && SESSION_USER.foto) ? SESSION_USER.foto : 'assets/img/padrao.jpg';
+                                var nome = (SESSION_USER && SESSION_USER.name) ? SESSION_USER.name : 'Você';
+                                var now = new Date();
+                                var timeStr = now.toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
+                                div.innerHTML = '<div style="width:36px;height:36px;border-radius:50%;overflow:hidden;margin-right:8px;flex:0 0 36px;"><img src="' + escapeHtml(foto) + '" alt="avatar" style="width:100%;height:100%;object-fit:cover;" onerror="this.src=\'assets/img/padrao.jpg\'"></div>' +
+                                    '<div style="flex:1;">' +
+                                    '<div style="font-size:0.95rem;color:#eaeaea;font-weight:600;">' + escapeHtml(nome) + ' <small style="color:#9a9a9a;font-weight:400;margin-left:6px;font-size:0.85rem;">' + escapeHtml(timeStr) + '</small></div>' +
+                                    '<div style="color:#d1d1d1;font-size:0.95rem;">' + escapeHtml(text).replace(/\n/g, '<br>') + '</div>' +
+                                    '</div>';
+                                cl.appendChild(div);
+                                // limpar input e rolar para o fim
+                                input.value = '';
+                                cl.scrollTop = cl.scrollHeight;
+                                // Atualiza contador de comentários no card
+                                var card = target.closest('.card');
+                                if (card) {
+                                    var countEl = card.querySelector('.comment-count');
+                                    if (countEl) countEl.textContent = parseInt(countEl.textContent || '0') + 1;
+                                }
+                            }).catch(function(){ target.disabled = false; alert('Erro ao enviar comentário'); });
                     });
                 })();
             </script>
