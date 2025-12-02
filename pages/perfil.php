@@ -281,14 +281,22 @@ $foto_val = $dados_usuario['foto'] ?? '';
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <?php
                     // Busca posts do usuário logado
-                    $stmt = $conn->prepare('SELECT id, conteudo_textual, imagem, data_criacao, num_curtidas, num_comentarios FROM postagens WHERE id_usuario = ? ORDER BY data_criacao DESC');
-                    $stmt->bind_param('i', $id_usuario);
+                    // Atualizado para verificar se o próprio usuário curtiu seus posts (para pintar o coração)
+                    $sql_posts = "SELECT p.id, p.conteudo_textual, p.imagem, p.data_criacao, p.num_curtidas, p.num_comentarios,
+                                  EXISTS(SELECT 1 FROM curtidas c WHERE c.id_postagem = p.id AND c.id_usuario = ?) AS liked
+                                  FROM postagens p 
+                                  WHERE p.id_usuario = ? 
+                                  ORDER BY p.data_criacao DESC";
+                    
+                    $stmt = $conn->prepare($sql_posts);
+                    $stmt->bind_param('ii', $id_usuario, $id_usuario);
                     $stmt->execute();
                     $res2 = $stmt->get_result();
                     while($p = $res2->fetch_assoc()) {
                         $p_conteudo = nl2br(htmlspecialchars($p['conteudo_textual']));
                         $p_img = $p['imagem'] ? '../assets/uploads/' . $p['imagem'] : null;
                         $p_data = date('d/m/Y H:i', strtotime($p['data_criacao']));
+                        $liked = !empty($p['liked']);
                     ?>
                     <div class="bg-[#1E1E1E] border border-[#333] rounded-lg p-3">
                         <div class="flex items-start gap-3">
@@ -304,17 +312,91 @@ $foto_val = $dados_usuario['foto'] ?? '';
                                         <img src="<?php echo $p_img; ?>" alt="Imagem" style="max-width:100%; height:auto;" onerror="this.style.display='none';">
                                     </div>
                                 <?php endif; ?>
-                                <div class="mt-3 flex items-center justify-between">
-                                    <div class="text-gray-400">
-                                        <i class="bi bi-heart"></i> <span class="ms-1"><?php echo intval($p['num_curtidas']); ?></span>
-                                        <i class="bi bi-chat ms-3"></i> <span class="ms-1"><?php echo intval($p['num_comentarios']); ?></span>
-                                    </div>
-                                    <div>
+                                <div class="mt-3 flex flex-col gap-3">
+                                    <div class="flex items-center justify-between text-gray-400">
+                                        <div class="flex items-center gap-4">
+                                            <!-- Botão de Like (Formulário) -->
+                                            <form method="POST" action="../php/like.php" class="flex items-center">
+                                                <input type="hidden" name="post_id" value="<?php echo intval($p['id']); ?>">
+                                                <input type="hidden" name="redirect_to" value="../pages/perfil.php?open_comments=<?php echo $p['id']; ?>#post-<?php echo $p['id']; ?>">
+                                                <button type="submit" class="flex items-center hover:text-white transition-colors group" title="<?php echo $liked ? 'Descurtir' : 'Curtir'; ?>">
+                                                    <i class="bi <?php echo $liked ? 'bi-heart-fill text-red-500' : 'bi-heart group-hover:text-red-500'; ?>"></i>
+                                                    <span class="ms-1 <?php echo $liked ? 'text-red-500' : ''; ?>"><?php echo intval($p['num_curtidas']); ?></span>
+                                                </button>
+                                            </form>
+
+                                            <a href="?open_comments=<?php echo $p['id']; ?>#post-<?php echo $p['id']; ?>" class="flex items-center hover:text-white transition-colors">
+                                                <i class="bi bi-chat"></i> <span class="ms-1"><?php echo intval($p['num_comentarios']); ?></span>
+                                            </a>
+                                        </div>
                                         <form method="POST" action="../php/delete_post.php" onsubmit="return confirm('Apagar esta publicação?');">
                                             <input type="hidden" name="post_id" value="<?php echo intval($p['id']); ?>">
-                                            <button type="submit" class="px-3 py-1 bg-red-600 text-white rounded-md text-sm">Apagar</button>
+                                            <button type="submit" class="px-3 py-1 bg-red-600 text-white rounded-md text-sm hover:bg-red-700 transition-colors">Apagar</button>
                                         </form>
                                     </div>
+
+                                    <!-- Área de Comentários (Server-Side) -->
+                                    <?php 
+                                    $open_comments = isset($_GET['open_comments']) ? intval($_GET['open_comments']) : 0;
+                                    if ($open_comments === intval($p['id'])): 
+                                    ?>
+                                    <div id="post-<?php echo $p['id']; ?>" class="bg-[#111] rounded-lg p-3 mt-2 border border-[#333]">
+                                        <h4 class="text-sm font-bold text-gray-400 mb-3">Comentários</h4>
+                                        <div class="space-y-3 max-h-60 overflow-y-auto pr-2 mb-3 custom-scrollbar">
+                                            <?php
+                                            $sql_comentarios = "SELECT c.conteudo, c.data_criacao, u.nome, u.foto 
+                                                                FROM comentarios c 
+                                                                JOIN perfil u ON c.id_usuario = u.id 
+                                                                WHERE c.id_postagem = ? 
+                                                                ORDER BY c.data_criacao ASC";
+                                            $stmtC = $conn->prepare($sql_comentarios);
+                                            if ($stmtC) {
+                                                $pid = $p['id'];
+                                                $stmtC->bind_param('i', $pid);
+                                                $stmtC->execute();
+                                                $stmtC->bind_result($c_conteudo, $c_data, $c_nome, $c_foto);
+                                                $has_comments = false;
+                                                while ($stmtC->fetch()) {
+                                                    $has_comments = true;
+                                                    // Tratamento da foto do comentarista
+                                                    $c_foto_path = '../assets/img/padrao.jpg';
+                                                    if (!empty($c_foto)) {
+                                                        if (strpos($c_foto, 'uploads/') === 0) $c_foto_path = '../assets/' . $c_foto;
+                                                        elseif (strpos($c_foto, 'assets_front') !== false || strpos($c_foto, 'http') === 0) $c_foto_path = $c_foto;
+                                                        else $c_foto_path = '../assets/uploads/' . $c_foto;
+                                                    }
+                                            ?>
+                                                <div class="flex gap-3 items-start">
+                                                    <div class="w-8 h-8 rounded-full overflow-hidden shrink-0 border border-[#333]">
+                                                        <img src="<?php echo $c_foto_path; ?>" class="w-full h-full object-cover" onerror="this.src='../assets/img/padrao.jpg'">
+                                                    </div>
+                                                    <div class="flex-grow">
+                                                        <div class="flex items-baseline gap-2">
+                                                            <span class="text-sm font-semibold text-white"><?php echo htmlspecialchars($c_nome); ?></span>
+                                                            <span class="text-xs text-gray-500"><?php echo date('d/m H:i', strtotime($c_data)); ?></span>
+                                                        </div>
+                                                        <p class="text-sm text-gray-300 mt-0.5"><?php echo nl2br(htmlspecialchars($c_conteudo)); ?></p>
+                                                    </div>
+                                                </div>
+                                            <?php 
+                                                }
+                                                if (!$has_comments) {
+                                                    echo '<p class="text-xs text-gray-500 italic">Nenhum comentário ainda.</p>';
+                                                }
+                                                $stmtC->close();
+                                            }
+                                            ?>
+                                        </div>
+                                        
+                                        <!-- Formulário de Comentário -->
+                                        <form action="../php/comment.php" method="POST" class="flex gap-2">
+                                            <input type="hidden" name="id_postagem" value="<?php echo $p['id']; ?>">
+                                            <input type="hidden" name="redirect_to" value="../pages/perfil.php?open_comments=<?php echo $p['id']; ?>#post-<?php echo $p['id']; ?>">
+                                            <input type="text" name="conteudo" placeholder="Escreva um comentário..." class="flex-grow bg-[#222] border border-[#333] rounded px-3 py-1.5 text-sm text-white focus:outline-none focus:border-[#555]" required>
+                                            <button type="submit" class="px-3 py-1.5 bg-white text-black text-sm font-bold rounded hover:bg-gray-200 transition-colors">Enviar</button>
+                                        </form>
+                                    </div>
+                                    <?php endif; ?>
                                 </div>
                             </div>
                         </div>

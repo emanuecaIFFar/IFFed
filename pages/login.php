@@ -28,7 +28,7 @@ if (isset($_GET['erro']) && $_GET['erro'] === 'login') {
     <main class="auth-shell">
         <section class="auth-card">
             <header class="auth-card__header">
-                <h1 class="auth-title">Entrar na rede</h1>
+                <h1 class="auth-title">Entrar no IFFed</h1>
                 <p class="auth-subtitle">Informe seus dados para validar o acesso</p>
             </header>
 

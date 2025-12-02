@@ -93,7 +93,7 @@ try {
         $action = 'unliked';
     } else {
         // Insere curtida
-        $ins = $conn->prepare('INSERT INTO curtidas (id_postagem, id_usuario, created_at) VALUES (?, ?, NOW())');
+        $ins = $conn->prepare('INSERT INTO curtidas (id_postagem, id_usuario, data_criacao) VALUES (?, ?, NOW())');
         $ins->bind_param('ii', $post_id, $user_id);
         $ins->execute();
         $ins->close();

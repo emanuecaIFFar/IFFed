@@ -37,16 +37,16 @@ CREATE TABLE IF NOT EXISTS postagens (
     FOREIGN KEY (id_usuario) REFERENCES perfil(id)
 ) ENGINE=InnoDB;
 
--- Tabela de Curtidas
+-- Tabela de Curtidas (Corrigida)
 CREATE TABLE IF NOT EXISTS curtidas (
     id INT AUTO_INCREMENT PRIMARY KEY,
     id_usuario INT NOT NULL,
     id_postagem INT NOT NULL,
+    data_criacao DATETIME DEFAULT CURRENT_TIMESTAMP, -- Adicionado esta coluna
     FOREIGN KEY (id_usuario) REFERENCES perfil(id),
     FOREIGN KEY (id_postagem) REFERENCES postagens(id)
 ) ENGINE=InnoDB;
-
--- ========================================================
+=======================================================
 -- 3. NOVAS TABELAS (INTERAÇÕES AVANÇADAS)
 -- ========================================================
 

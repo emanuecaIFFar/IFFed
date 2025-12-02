@@ -39,14 +39,19 @@ if (isset($_GET['status']) && $_GET['status'] === 'ok') {
             <?php endif; ?>
 
             <form action="../php/cadastrar.php" method="POST" enctype="multipart/form-data" class="form-stack form-stack--loose">
-                <div class="form-field">
-                    <label class="form-label" for="foto-perfil">Foto de perfil (opcional)</label>
-                    <label class="input-file">
-                        <span class="input-file__label">Selecionar imagem</span>
-                        <span class="input-file__hint">PNG ou JPG até 2 MB</span>
-                        <input type="file" id="foto-perfil" name="foto_perfil" accept="image/*">
-                    </label>
-                    <p class="field-hint">Se nenhum arquivo for enviado, manteremos o avatar padrão.</p>
+                <div class="form-field" style="align-items: center;">
+                    <label class="form-label">Foto de perfil</label>
+                    <div class="avatar-upload-container">
+                        <div class="avatar-preview">
+                            <img id="avatar-preview-img" src="../assets/img/padrao.jpg" alt="Avatar">
+                        </div>
+                        <label for="foto-perfil" class="avatar-upload-btn" title="Alterar foto">
+                            <!-- Ícone de câmera (SVG inline para não depender de lib externa aqui) -->
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+                        </label>
+                        <input type="file" id="foto-perfil" name="foto_perfil" accept="image/*" style="display: none;" onchange="document.getElementById('avatar-preview-img').src = window.URL.createObjectURL(this.files[0])">
+                    </div>
+                    <p class="field-hint">Toque no ícone para escolher</p>
                 </div>
 
                 <div class="form-field">

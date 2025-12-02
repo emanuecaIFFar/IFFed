@@ -49,3 +49,281 @@ body {
 .object-cover { object-fit: cover; }
 .hidden { display: none; }
 .min-h-screen { min-height: 100vh; }
+
+/* =========================================
+   Estilos de Autenticação (Login / Cadastro)
+   ========================================= */
+
+/* Blobs de fundo (efeito visual) - REMOVIDO A PEDIDO */
+.background-blob {
+    display: none;
+}
+/*
+.background-blob {
+    position: fixed;
+    width: 300px;
+    height: 300px;
+    border-radius: 50%;
+    filter: blur(80px);
+    z-index: -1;
+    opacity: 0.4;
+}
+.background-blob--left {
+    top: -50px;
+    left: -50px;
+    background: #4f46e5; 
+}
+.background-blob--right {
+    bottom: -50px;
+    right: -50px;
+    background: #ec4899; 
+}
+*/
+
+/* Container central */
+.auth-shell {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+/* Card de Login/Cadastro */
+.auth-card {
+    width: 100%;
+    max-width: 400px;
+    background-color: #111;
+    border: 1px solid #333;
+    border-radius: 16px;
+    padding: 40px;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+}
+
+.auth-card__header {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.auth-title {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: #fff;
+    margin: 0 0 10px 0;
+}
+
+.auth-subtitle {
+    color: #888;
+    font-size: 0.95rem;
+    margin: 0;
+}
+
+/* Alertas */
+.alert-banner {
+    padding: 12px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    font-size: 0.9rem;
+    text-align: center;
+}
+.alert-error {
+    background-color: rgba(220, 38, 38, 0.2);
+    color: #fca5a5;
+    border: 1px solid rgba(220, 38, 38, 0.3);
+}
+.alert-success {
+    background-color: rgba(22, 163, 74, 0.2);
+    color: #86efac;
+    border: 1px solid rgba(22, 163, 74, 0.3);
+}
+
+/* Formulário */
+.form-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.form-stack--loose {
+    gap: 24px;
+}
+
+.form-field {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.form-label {
+    color: #ccc;
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.form-input {
+    background-color: #1a1a1a;
+    border: 1px solid #333;
+    border-radius: 8px;
+    padding: 12px 16px;
+    color: #fff;
+    font-size: 1rem;
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+.form-input:focus {
+    border-color: #666;
+}
+
+/* Textarea */
+.form-input--textarea {
+    min-height: 100px;
+    resize: vertical;
+    font-family: inherit;
+}
+
+/* Dicas de campo */
+.field-hint {
+    font-size: 0.8rem;
+    color: #666;
+    margin-top: 6px;
+    margin-bottom: 0;
+}
+
+/* Input de Arquivo Customizado */
+.input-file {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    border: 2px dashed #333;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+    background-color: #151515;
+}
+
+.input-file:hover {
+    border-color: #666;
+    background-color: #1a1a1a;
+}
+
+.input-file input[type="file"] {
+    display: none;
+}
+
+.input-file__label {
+    font-weight: 600;
+    color: #e5e5e5;
+    margin-bottom: 4px;
+}
+
+.input-file__hint {
+    font-size: 0.8rem;
+    color: #888;
+}
+
+.button-primary {
+    background-color: #fff;
+    color: #000;
+    border: none;
+    border-radius: 8px;
+    padding: 14px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    margin-top: 10px;
+}
+
+.button-primary:hover {
+    background-color: #e5e5e5;
+}
+
+/* Ajuste para card mais largo no cadastro */
+.auth-shell--wide .auth-card {
+    max-width: 700px;
+}
+
+/* Grid para campos lado a lado (ex: data e senha) */
+.form-grid {
+    display: grid;
+    gap: 16px;
+}
+
+.form-grid--two {
+    grid-template-columns: 1fr 1fr;
+}
+
+@media (max-width: 600px) {
+    .form-grid--two {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Rodapé do card */
+.auth-footer {
+    margin-top: 30px;
+    text-align: center;
+    font-size: 0.9rem;
+    color: #666;
+}
+
+.link-inline {
+    color: #fff;
+    text-decoration: none;
+    font-weight: 500;
+    margin-left: 5px;
+}
+
+.link-inline:hover {
+    text-decoration: underline;
+}
+
+/* =========================================
+   Avatar Upload (Cadastro)
+   ========================================= */
+.avatar-upload-container {
+    position: relative;
+    width: 120px;
+    height: 120px;
+    margin: 0 auto;
+}
+
+.avatar-preview {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    border: 3px solid #333;
+    overflow: hidden;
+    background-color: #000;
+}
+
+.avatar-preview img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.avatar-upload-btn {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    background-color: #fff;
+    color: #000;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    border: 2px solid #111;
+    transition: transform 0.2s, background-color 0.2s;
+}
+
+.avatar-upload-btn:hover {
+    background-color: #e5e5e5;
+    transform: scale(1.1);
+}
