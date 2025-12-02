@@ -93,7 +93,8 @@ try {
         $action = 'unliked';
     } else {
         // Insere curtida
-        $ins = $conn->prepare('INSERT INTO curtidas (id_postagem, id_usuario, data_criacao) VALUES (?, ?, NOW())');
+        // Removido data_criacao para compatibilidade com tabelas sem essa coluna
+        $ins = $conn->prepare('INSERT INTO curtidas (id_postagem, id_usuario) VALUES (?, ?)');
         $ins->bind_param('ii', $post_id, $user_id);
         $ins->execute();
         $ins->close();
@@ -135,7 +136,27 @@ try {
 
     // Se foi submetido via formulário, redireciona de volta
     if (!empty($_POST['redirect_to'])) {
-        header('Location: ' . $_POST['redirect_to']);
+        $redirect = $_POST['redirect_to'];
+        // Adiciona um timestamp para evitar cache do navegador
+        if (strpos($redirect, '?') === false) {
+            // Se não tem query string, adiciona ?t=... antes da âncora
+            if (strpos($redirect, '#') !== false) {
+                $parts = explode('#', $redirect, 2);
+                $redirect = $parts[0] . '?t=' . time() . '#' . $parts[1];
+            } else {
+                $redirect .= '?t=' . time();
+            }
+        } else {
+            // Se já tem query string, adiciona &t=... antes da âncora
+            if (strpos($redirect, '#') !== false) {
+                $parts = explode('#', $redirect, 2);
+                $redirect = $parts[0] . '&t=' . time() . '#' . $parts[1];
+            } else {
+                $redirect .= '&t=' . time();
+            }
+        }
+        
+        header('Location: ' . $redirect);
         exit;
     }
 
@@ -145,6 +166,10 @@ try {
     $conn->rollback();
     $msg = $e->getMessage();
     $code = $e->getCode();
+    
+    // Log de erro em arquivo visível na raiz para debug
+    file_put_contents(__DIR__ . '/../debug_like_error.txt', date('Y-m-d H:i:s') . " - Erro: " . $msg . "\n", FILE_APPEND);
+    
     error_log('[like.php] Throwable: code=' . $code . ' msg=' . $msg . "\n" . $e->getTraceAsString());
     if (!empty($_POST['redirect_to'])) {
         header('Location: ' . $_POST['redirect_to']);

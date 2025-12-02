@@ -318,7 +318,8 @@ $foto_val = $dados_usuario['foto'] ?? '';
                                             <!-- Botão de Like (Formulário) -->
                                             <form method="POST" action="../php/like.php" class="flex items-center">
                                                 <input type="hidden" name="post_id" value="<?php echo intval($p['id']); ?>">
-                                                <input type="hidden" name="redirect_to" value="../pages/perfil.php?open_comments=<?php echo $p['id']; ?>#post-<?php echo $p['id']; ?>">
+                                                <!-- Redireciona para a mesma página, na âncora do post -->
+                                                <input type="hidden" name="redirect_to" value="../pages/perfil.php#post-<?php echo $p['id']; ?>">
                                                 <button type="submit" class="flex items-center hover:text-white transition-colors group" title="<?php echo $liked ? 'Descurtir' : 'Curtir'; ?>">
                                                     <i class="bi <?php echo $liked ? 'bi-heart-fill text-red-500' : 'bi-heart group-hover:text-red-500'; ?>"></i>
                                                     <span class="ms-1 <?php echo $liked ? 'text-red-500' : ''; ?>"><?php echo intval($p['num_curtidas']); ?></span>
