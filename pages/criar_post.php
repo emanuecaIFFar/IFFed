@@ -1,4 +1,43 @@
+<?php
+session_start();
+require_once __DIR__ . '/../php/conexao.php';
 
+// Se não estiver logado, manda pro login
+if (!isset($_SESSION['id'])) {
+    header('Location: login.php?erro=nao_autenticado');
+    exit;
+}
+
+// Busca dados do usuário logado para exibir na interface (Front)
+$current_user = intval($_SESSION['id']);
+$sessionUserFoto = '../assets/img/padrao.jpg';
+$sessionUserName = 'Usuário';
+
+
+// nos temos criar post e creat pois o creat vai puxar as informações do usuario para que fique bonito tope isso ai
+
+$stmU = $conn->prepare('SELECT nome, foto FROM perfil WHERE id = ? LIMIT 1');
+if ($stmU) {
+    $stmU->bind_param('i', $current_user);
+    $stmU->execute();
+    $stmU->bind_result($u_nome, $u_foto);
+    if ($stmU->fetch()) {
+        $sessionUserName = $u_nome ?? $sessionUserName;
+        $sf = $u_foto ?? '';
+        // Lógica de caminho da foto
+        if (empty($sf)) {
+            $sessionUserFoto = '../assets/img/padrao.jpg';
+        } elseif (strpos($sf, 'uploads/') === 0) {
+            $sessionUserFoto = '../assets/' . $sf;
+        } elseif (strpos($sf, 'assets_front') !== false || strpos($sf, 'http') === 0) {
+            $sessionUserFoto = $sf;
+        } else {
+            $sessionUserFoto = '../assets/uploads/' . $sf;
+        }
+    }
+    $stmU->close();
+}
+?>
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -11,43 +50,7 @@
     
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
-
-    <style>
-        /* Configurações Globais */
-        body { 
-            background-color: #000000; 
-            color: #e5e7eb; 
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            overflow-x: hidden;
-        }
-        
-        /* Custom Scrollbar */
-        ::-webkit-scrollbar { width: 8px; }
-        ::-webkit-scrollbar-track { background: #000; }
-        ::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: #555; }
-
-        /* Sidebar Transitions */
-        #sidebar { width: 80px; }
-        #sidebar.expanded { width: 260px; }
-
-        .sidebar-label {
-            opacity: 0;
-            display: none;
-            white-space: nowrap;
-            transition: opacity 0.2s ease-in-out;
-        }
-        .expanded .sidebar-label {
-            display: inline-block;
-            opacity: 1;
-        }
-
-        #main-container {
-            margin-left: 80px;
-            transition: margin-left 0.3s ease-in-out;
-        }
-        #main-container.expanded-margin { margin-left: 260px; }
-    </style>
+    <link rel="stylesheet" href="../assets/style.css">
 </head>
 <body class="min-h-screen flex flex-col">
 
@@ -62,7 +65,7 @@
             </a>
 
             <!-- Pesquisar -->
-            <a href="pesquisar_nseifazrisso.html" class="flex items-center h-[60px] w-full rounded-lg transition-colors duration-200 text-[#a8a8a8] hover:bg-[#181818] hover:text-white justify-center group nav-item" title="Pesquisar">
+            <a href="pesquisar_nseifazrisso.php" class="flex items-center h-[60px] w-full rounded-lg transition-colors duration-200 text-[#a8a8a8] hover:bg-[#181818] hover:text-white justify-center group nav-item" title="Pesquisar">
                 <i data-lucide="search" class="w-7 h-7 stroke-[2]"></i>
                 <span class="ml-4 text-lg font-medium sidebar-label">Pesquisar</span>
             </a>
@@ -126,12 +129,12 @@
                     <!-- Cabeçalho do Card (Usuário) -->
                     <div class="flex items-center p-6 pb-2">
                         <div class="w-12 h-12 rounded-full overflow-hidden border-2 border-[#333] mr-4">
-                            <img id="criar-avatar" src="../assets/img/padrao.jpg" alt="User Avatar" class="w-full h-full object-cover" onerror="this.onerror=null;this.src='../assets/img/padrao.jpg';">
+                            <img id="criar-avatar" src="<?php echo htmlspecialchars($sessionUserFoto); ?>" alt="User Avatar" class="w-full h-full object-cover" onerror="this.onerror=null;this.src='../assets/img/padrao.jpg';">
                         </div>
                         <div>
-                            <p id="criar-username" class="text-white font-semibold text-lg">Carregando...</p>
+                            <p id="criar-username" class="text-white font-semibold text-lg"><?php echo htmlspecialchars($sessionUserName); ?></p>
                             <div class="flex items-center gap-2">
-                                <span id="criar-handle" class="text-[#888] text-sm">@usuario</span>
+                                <span id="criar-handle" class="text-[#888] text-sm">@<?php echo strtolower(str_replace(' ', '_', preg_replace('/\s+/', ' ', $sessionUserName))); ?></span>
                                 <span class="text-[#444] text-xs">•</span>
                                 <div class="flex items-center text-[#888] text-xs bg-[#2a2a2a] px-2 py-0.5 rounded-full border border-[#333] cursor-pointer hover:text-white transition-colors">
                                     <i data-lucide="globe" class="w-3 h-3 mr-1"></i>

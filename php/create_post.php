@@ -9,14 +9,14 @@ if (!isset($_SESSION['id'])) {
 }
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    header('Location: ../pages/criar_post.html');
+    header('Location: ../pages/criar_post.php');
     exit;
 }
 
 $user_id = intval($_SESSION['id']);
 $conteudo = trim($_POST['conteudo'] ?? '');
 
-// Processar upload de imagem (opcional)
+// Processar upload de imagem 
 $imagem_nome = NULL;
 if (!empty($_FILES['imagem']['name'])) {
     $file = $_FILES['imagem'];
@@ -26,17 +26,17 @@ if (!empty($_FILES['imagem']['name'])) {
         $maxBytes = 5 * 1024 * 1024; // 5MB
         if ($info === false) {
             $_SESSION['flash_error'] = 'Arquivo não é uma imagem válida.';
-            header('Location: ../pages/criar_post.html'); exit;
+            header('Location: ../pages/criar_post.php'); exit;
         }
         if ($file['size'] > $maxBytes) {
             $_SESSION['flash_error'] = 'Imagem muito grande (max 5MB).';
-            header('Location: ../pages/criar_post.html'); exit;
+            header('Location: ../pages/criar_post.php'); exit;
         }
         $allowed = ['image/jpeg'=>'jpg','image/png'=>'png','image/webp'=>'webp'];
         $mime = $info['mime'];
         if (!isset($allowed[$mime])) {
             $_SESSION['flash_error'] = 'Tipo de imagem não permitido.';
-            header('Location: ../pages/criar_post.html'); exit;
+            header('Location: ../pages/criar_post.php'); exit;
         }
         $ext = $allowed[$mime];
         $uploadsDir = __DIR__ . '/../assets/uploads/';
@@ -45,7 +45,7 @@ if (!empty($_FILES['imagem']['name'])) {
         $dest = $uploadsDir . $imagem_nome;
         if (!move_uploaded_file($tmp, $dest)) {
             $_SESSION['flash_error'] = 'Falha ao mover imagem.';
-            header('Location: ../pages/criar_post.html'); exit;
+            header('Location: ../pages/criar_post.php'); exit;
         }
     }
 }
@@ -55,14 +55,14 @@ $sql = 'INSERT INTO postagens (conteudo_textual, id_usuario, imagem, data_criaca
 $stmt = $conn->prepare($sql);
 if (!$stmt) {
     $_SESSION['flash_error'] = 'Erro no banco.';
-    header('Location: ../pages/criar_post.html'); exit;
+    header('Location: ../pages/criar_post.php'); exit;
 }
 $imgParam = $imagem_nome;
 $stmt->bind_param('sis', $conteudo, $user_id, $imgParam);
 $ok = $stmt->execute();
 if (!$ok) {
     $_SESSION['flash_error'] = 'Falha ao salvar postagem.';
-    header('Location: ../pages/criar_post.html'); exit;
+    header('Location: ../pages/criar_post.php'); exit;
 }
 $stmt->close();
 

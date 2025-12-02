@@ -1,22 +1,26 @@
 <?php
 // php/like.php
-header('Content-Type: application/json; charset=utf-8');
 session_start();
 require_once __DIR__ . '/conexao.php';
 
 // Habilita exceptions do MySQLi para facilitar debug local
 mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
 
-
-
+// Se não autenticado, redireciona quando solicitado ou responde JSON
 if (!isset($_SESSION['id'])) {
+    if (!empty($_POST['redirect_to'])) {
+        header('Location: ' . $_POST['redirect_to']);
+        exit;
+    }
     http_response_code(401);
+    header('Content-Type: application/json; charset=utf-8');
     echo json_encode(['success' => false, 'error' => 'não autenticado']);
     exit;
 }
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     http_response_code(405);
+    header('Content-Type: application/json; charset=utf-8');
     echo json_encode(['success' => false, 'error' => 'método inválido']);
     exit;
 }
@@ -25,7 +29,12 @@ $post_id = intval($_POST['post_id'] ?? 0);
 $user_id = intval($_SESSION['id']);
 
 if ($post_id <= 0) {
+    if (!empty($_POST['redirect_to'])) {
+        header('Location: ' . $_POST['redirect_to']);
+        exit;
+    }
     http_response_code(400);
+    header('Content-Type: application/json; charset=utf-8');
     echo json_encode(['success' => false, 'error' => 'post inválido']);
     exit;
 }
@@ -71,9 +80,7 @@ try {
             try {
                 $tipo = 'like';
                 $delNotif = $conn->prepare('DELETE FROM notificacoes WHERE tipo = ? AND id_postagem = ? AND id_usuario_destino = ? AND id_usuario_origem = ?');
-                if (!$delNotif) {
-                    error_log('[like.php] Falha prepare DELETE notificacoes: ' . $conn->error);
-                } else {
+                if ($delNotif) {
                     $delNotif->bind_param('siii', $tipo, $post_id, $post_owner_id, $user_id);
                     $delNotif->execute();
                     $delNotif->close();
@@ -102,16 +109,12 @@ try {
             try {
                 $tipo = 'like';
                 $notif = $conn->prepare('INSERT INTO notificacoes (id_usuario_destino, id_usuario_origem, tipo, id_postagem, lida, data_criacao) VALUES (?, ?, ?, ?, 0, NOW())');
-                if (!$notif) {
-                    error_log('[like.php] Falha prepare INSERT notificacoes: ' . $conn->error);
-                } else {
-                    // bind_param espera referências; tipos: int, int, string, int
+                if ($notif) {
                     $notif->bind_param('iisi', $post_owner_id, $user_id, $tipo, $post_id);
                     $notif->execute();
                     $notif->close();
                 }
             } catch (Throwable $e) {
-                // Não tornar a falha de notificação fatal para a operação de curtida
                 error_log('[like.php] Erro ao inserir notificação: ' . $e->getMessage());
             }
         }
@@ -129,16 +132,26 @@ try {
     $q->close();
 
     $conn->commit();
+
+    // Se foi submetido via formulário, redireciona de volta
+    if (!empty($_POST['redirect_to'])) {
+        header('Location: ' . $_POST['redirect_to']);
+        exit;
+    }
+
     echo json_encode(['success' => true, 'action' => $action, 'total' => $total]);
     exit;
 } catch (Throwable $e) {
-    // Registra detalhes do erro para depuração local
     $conn->rollback();
     $msg = $e->getMessage();
     $code = $e->getCode();
     error_log('[like.php] Throwable: code=' . $code . ' msg=' . $msg . "\n" . $e->getTraceAsString());
+    if (!empty($_POST['redirect_to'])) {
+        header('Location: ' . $_POST['redirect_to']);
+        exit;
+    }
     http_response_code(500);
-    // Retorna mensagem de erro (útil apenas em ambiente de desenvolvimento local)
+    header('Content-Type: application/json; charset=utf-8');
     echo json_encode([
         'success' => false,
         'error' => 'erro ao processar curtida',
