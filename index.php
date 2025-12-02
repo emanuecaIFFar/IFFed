@@ -277,11 +277,11 @@ session_start();
                     <i data-lucide="plus-square" class="w-7 h-7 stroke-[2]"></i>
                     <span class="ml-4 text-lg font-medium sidebar-label">Novo Post</span>
                 </a>
-                    <a href="pages/notificacoes.php" class="flex items-center h-[60px] w-full rounded-lg transition-colors duration-200 text-[#a8a8a8] hover:bg-[#181818] hover:text-white justify-center group nav-item" title="Notificações">
+                    <a href="#" class="flex items-center h-[60px] w-full rounded-lg transition-colors duration-200 text-[#a8a8a8] hover:bg-[#181818] hover:text-white justify-center group nav-item" title="Notificações">
                     <i data-lucide="heart" class="w-7 h-7 stroke-[2]"></i>
                     <span class="ml-4 text-lg font-medium sidebar-label">Notificações</span>
                 </a>
-                <a href="pages/comunidades.html" class="flex items-center h-[60px] w-full rounded-lg transition-colors duration-200 text-[#a8a8a8] hover:bg-[#181818] hover:text-white justify-center group nav-item" title="Comunidades">
+                <a href="#" class="flex items-center h-[60px] w-full rounded-lg transition-colors duration-200 text-[#a8a8a8] hover:bg-[#181818] hover:text-white justify-center group nav-item" title="Comunidades">
                     <i data-lucide="users" class="w-7 h-7 stroke-[2]"></i>
                     <span class="ml-4 text-lg font-medium sidebar-label">Comunidades</span>
                 </a>
@@ -531,7 +531,7 @@ session_start();
                             });
                     });
 
-                    // Comentar: abre/fecha painel de comentários e envia comentário inline
+                    // Comentar: comportamento simplificado — não realiza GET para carregar comentários
                     document.querySelectorAll('.btn-comment').forEach(function(btn){
                         btn.addEventListener('click', function(e){
                             e.preventDefault();
@@ -543,26 +543,9 @@ session_start();
                                 panel.style.display = 'block';
                                 var cl = panel.querySelector('.comments-list');
                                 if (cl && !cl.dataset.loaded) {
-                                    // Carrega comentários via AJAX
-                                    cl.innerHTML = '<div class="text-muted" style="padding:8px">Carregando comentários...</div>';
-                                    fetch('php/get_comments.php?post_id=' + encodeURIComponent(postId), { credentials: 'same-origin' })
-                                        .then(r => r.json())
-                                        .then(json => {
-                                            if (!json.success) {
-                                                cl.innerHTML = '<div class="text-danger" style="padding:8px">Erro ao carregar.</div>';
-                                                return;
-                                            }
-                                            cl.innerHTML = '';
-                                            json.data.forEach(function(c){
-                                                var div = document.createElement('div');
-                                                div.className = 'd-flex align-items-start mb-2';
-                                                div.innerHTML = '<div style="width:36px;height:36px;border-radius:50%;overflow:hidden;margin-right:8px;flex:0 0 36px;"><img src="'+escapeHtml(c.autor_foto)+'" alt="avatar" style="width:100%;height:100%;object-fit:cover;" onerror="this.src=\'assets/img/padrao.jpg\'"></div>'+
-                                                    '<div style="flex:1;"><div style="font-size:0.95rem;color:#eaeaea;font-weight:600;">'+escapeHtml(c.autor_nome)+' <small style="color:#9a9a9a;font-weight:400;margin-left:6px;font-size:0.85rem;">'+escapeHtml(new Date(c.data_criacao).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }))+'</small></div><div style="color:#d1d1d1;font-size:0.95rem;">'+escapeHtml(c.conteudo).replace(/\n/g,'<br>')+'</div></div>';
-                                                cl.appendChild(div);
-                                            });
-                                            cl.dataset.loaded = '1';
-                                            cl.scrollTop = cl.scrollHeight;
-                                        }).catch(function(){ cl.innerHTML = '<div class="text-danger" style="padding:8px">Erro de rede.</div>'; });
+                                    // NÃO carregar via GET — comentários via GET foram desativados
+                                    cl.innerHTML = '<div class="text-muted" style="padding:8px">Comentários via GET desativados.</div>';
+                                    cl.dataset.loaded = '1';
                                 }
                                 var inp = panel.querySelector('.comment-text-input');
                                 if (inp) inp.focus();
