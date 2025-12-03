@@ -41,7 +41,44 @@ if (intval($row['id_usuario']) !== $user_id) {
 // Começa transação para garantir integridade
 $conn->begin_transaction();
 try {
-    // Deleta registro
+    // Primeiro, deleta registros dependentes (Foreign Keys)
+    // Deleta curtidas do post
+    try {
+        $delCurtidas = $conn->prepare('DELETE FROM curtidas WHERE id_postagem = ?');
+        if ($delCurtidas) {
+            $delCurtidas->bind_param('i', $post_id);
+            $delCurtidas->execute();
+            $delCurtidas->close();
+        }
+    } catch (Throwable $e) {
+        // Ignora se a tabela não existir
+    }
+
+    // Deleta comentários do post
+    try {
+        $delComentarios = $conn->prepare('DELETE FROM comentarios WHERE id_postagem = ?');
+        if ($delComentarios) {
+            $delComentarios->bind_param('i', $post_id);
+            $delComentarios->execute();
+            $delComentarios->close();
+        }
+    } catch (Throwable $e) {
+        // Ignora se a tabela não existir
+    }
+
+    // Deleta notificações relacionadas ao post (se existir a tabela)
+    try {
+        $delNotif = $conn->prepare('DELETE FROM notificacoes WHERE id_postagem = ?');
+        if ($delNotif) {
+            $delNotif->bind_param('i', $post_id);
+            $delNotif->execute();
+            $delNotif->close();
+        }
+    } catch (Throwable $e) {
+        // Ignora se a tabela não existir
+    }
+
+    // Agora deleta o post
     $del = $conn->prepare('DELETE FROM postagens WHERE id = ? AND id_usuario = ?');
     $del->bind_param('ii', $post_id, $user_id);
     $ok = $del->execute();
@@ -59,7 +96,9 @@ try {
     $_SESSION['flash_success'] = 'Publicação apagada.';
 } catch (Exception $e) {
     $conn->rollback();
-    $_SESSION['flash_error'] = 'Erro ao apagar publicação.';
+    $_SESSION['flash_error'] = 'Erro ao apagar publicação: ' . $e->getMessage();
+    // Log para debug
+    file_put_contents(__DIR__ . '/../debug_delete_error.txt', date('Y-m-d H:i:s') . " - Erro: " . $e->getMessage() . "\n", FILE_APPEND);
 }
 
 header('Location: ../pages/perfil.php');

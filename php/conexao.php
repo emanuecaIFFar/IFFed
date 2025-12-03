@@ -1,7 +1,5 @@
 <?php
-// php/conexao.php
-
-// Configurações do USBWebServer
+//USBWebServer
 $servidor = "localhost";
 $usuario = "root"; 
 $senha = "usbw"; //senha "usbw"
