@@ -1,16 +1,4 @@
-# IFFed - Rede Social
-
-**Status:** Em desenvolvimento 🚧
-
-## Sobre o projeto
-
-Este projeto é uma Rede Social Escolar desenvolvida como atividade prática para a disciplina de Desenvolvimento Web. O objetivo é integrar Front-end e Back-end usando PHP e MySQL, cobrindo autenticação, upload de arquivos, sessões e exibição de perfis.
-
-Principais conceitos usados:
-
-- Conexão com banco de dados MySQL
-- Autenticação (Login / Logout)
-# IFFed - Rede Social
+# IFeed - Rede Social
 
 **Status:** Em desenvolvimento 🚧
 
@@ -44,7 +32,7 @@ Principais conceitos usados:
 Abra o terminal na pasta onde coloca os projetos web e rode:
 
 ```bash
-git clone https://github.com/SEU_USUARIO/IFFed.git
+git clone https://github.com/SEU_USUARIO/IFeed.git
 ```
 
 3. Criar banco de dados e tabelas
@@ -80,12 +68,12 @@ Edite o arquivo `php/conexao.php` para checar as credenciais do seu ambiente (us
 
 5. Acesse no navegador
 
-Abra `http://localhost/IFFed/index.php` (ou a URL/porta correspondente ao seu servidor local).
+Abra `http://localhost/IFeed/index.php` (ou a URL/porta correspondente ao seu servidor local).
 
 ## Estrutura de pastas
 
 ```
-IFFed/
+IFeed/
 ├── assets_front/      # CSS, JS, imagens
 │   ├── css/
 │   ├── img/
@@ -207,37 +195,53 @@ Todas as páginas/ endpoints que exigem autenticação devem chamar `session_sta
 
 Observação: podem existir arquivos adicionais em `php/` com lógicas específicas; os nomes acima são os principais lidos pelo front-end atual.
 
-## API unificada (arquivo `php/api.php`)
+---
 
-Para simplificar a explicação e o desenvolvimento do front-end, foi criado um arquivo chamado `php/api.php` que reúne pequenos endpoints que retornam JSON. A ideia é concentrar ações de integração (principalmente relacionadas a notificações e dados de sessão) em um único lugar, mantendo as URLs antigas funcionais através de "wrappers".
+## Por que usamos POST e não GET para ações como curtir?
 
-O que foi unido:
-- `get_notifications` — retorna as notificações do usuário (disponível via `php/get_notifications.php` ou `php/api.php?action=get_notifications`).
-- `mark_notifications_read` — marca notificações como lidas (`php/mark_notifications_read.php` ou `php/api.php?action=mark_notifications_read`).
-- `get_session_user` — retorna id, nome e `foto_url` do usuário logado (`php/get_session_user.php` ou `php/api.php?action=get_session_user`).
+### Diferença entre GET e POST
 
-Por que fizemos essa junção:
-- Menos arquivos pequenos espalhados pelo projeto facilita a apresentação e o entendimento do fluxo.
-- Centralizar o retorno JSON reduz duplicação (checagem de sessão, conexão, normalização de `foto`) e facilita manutenção.
-- As rotas antigas foram mantidas como wrappers (arquivos que apenas invocam `api.php?action=...`) para não quebrar o front existente.
+| Característica | GET | POST |
+|----------------|-----|------|
+| **Propósito** | Buscar/ler dados | Enviar/modificar dados |
+| **Dados na URL** | Sim (`?id=123&action=like`) | Não (no corpo da requisição) |
+| **Histórico do navegador** | Fica salvo | Não fica |
+| **Cache** | Pode ser cacheado | Não é cacheado |
+| **Tamanho** | Limitado (~2000 caracteres) | Praticamente ilimitado |
+| **Segurança** | Menos seguro (dados visíveis) | Mais seguro |
 
-Exemplo de uso (fetch no front-end):
+### Por que curtidas usam POST?
 
-```js
-// Buscar notificações (GET)
-fetch('/php/api.php?action=get_notifications', { credentials: 'same-origin' })
-  .then(r => r.json())
-  .then(json => console.log(json));
+1. **Segurança contra CSRF**: Se curtir usasse GET (`like.php?id=5`), um atacante poderia colocar essa URL em uma imagem:
+   ```html
+   <img src="http://seusite.com/php/like.php?id=5">
+   ```
+   Qualquer usuário logado que visualizasse essa imagem curtiria o post automaticamente!
 
-// Marcar todas como lidas (POST)
-fetch('/php/api.php?action=mark_notifications_read', {
-  method: 'POST',
-  credentials: 'same-origin',
-  body: new URLSearchParams({ all: 1 })
-}).then(r => r.json()).then(console.log);
+2. **Semântica HTTP**: GET é para **ler** dados, POST é para **modificar**. Curtir modifica o banco de dados.
+
+3. **Prevenção de acidentes**: Se você compartilhar uma URL GET de curtir, quem clicar vai curtir sem querer.
+
+4. **Bots e crawlers**: Bots de busca (Google, etc.) seguem links GET. Se curtir fosse GET, o Googlebot poderia curtir posts!
+
+### Exemplo prático
+
+```php
+// ❌ ERRADO - Vulnerável!
+if ($_GET['action'] === 'like') {
+    // Qualquer um pode forçar curtida via URL
+}
+
+// ✅ CORRETO - Seguro
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    // Só aceita requisições POST intencionais
+}
 ```
 
-Observação: se preferir, o front pode continuar chamando `php/get_notifications.php` e `php/mark_notifications_read.php` — os wrappers vão encaminhar para `api.php` automaticamente.
+### Regra geral
+
+- **GET**: Buscar posts, ver perfil, pesquisar (ações de LEITURA)
+- **POST**: Curtir, comentar, criar post, deletar (ações que MODIFICAM dados)
 
 ---
 

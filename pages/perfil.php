@@ -19,10 +19,13 @@ $dados_usuario = $resultado->fetch_assoc();
 
 // Normaliza caminho da foto para uso nas views
 $foto_val = $dados_usuario['foto'] ?? '';
-       if (empty($foto_val)) {
-           $foto_path = '../assets/img/padrao.jpg';
+if (empty($foto_val) || $foto_val === 'padrao.jpg' || $foto_val === 'img/padrao.jpg' || $foto_val === 'img/padrao.svg') {
+    // Foto padrão (avatar genérico)
+    $foto_path = '../assets/img/padrao.svg';
 } elseif (strpos($foto_val, 'uploads/') === 0) {
     $foto_path = '../assets/' . $foto_val; // já armazena 'uploads/nome.jpg'
+} elseif (strpos($foto_val, 'img/') === 0) {
+    $foto_path = '../assets/' . $foto_val; // outras imagens em img/
 } elseif (strpos($foto_val, 'assets_front') !== false || strpos($foto_val, 'http') === 0) {
     $foto_path = $foto_val;
 } else {
@@ -196,7 +199,7 @@ $foto_val = $dados_usuario['foto'] ?? '';
                                         src="<?php echo $foto_path; ?>" 
                                         alt="Profile Avatar" 
                                         class="w-full h-full object-cover opacity-90 group-hover:opacity-100 transition-opacity"
-                                        onerror="this.onerror=null;this.src='../assets/img/padrao.jpg';"
+                                        onerror="this.onerror=null;this.src='../assets/img/padrao.svg';"
                                     />
                                 </div>
                                 <button 
@@ -301,7 +304,7 @@ $foto_val = $dados_usuario['foto'] ?? '';
                     <div class="bg-[#1E1E1E] border border-[#333] rounded-lg p-3">
                         <div class="flex items-start gap-3">
                             <div style="width:44px; height:44px; overflow:hidden; border-radius:50%;">
-                                <img src="<?php echo $foto_path; ?>" alt="Avatar" style="width:100%; height:100%; object-fit:cover;" onerror="this.onerror=null;this.src='../assets/img/padrao.jpg';">
+                                <img src="<?php echo $foto_path; ?>" alt="Avatar" style="width:100%; height:100%; object-fit:cover;" onerror="this.onerror=null;this.src='../assets/img/padrao.svg';">
                             </div>
                             <div class="flex-grow">
                                 <div class="text-white font-semibold"><?php echo htmlspecialchars($dados_usuario['nome'] ?: $_SESSION['nome_usuario']); ?></div>
@@ -360,7 +363,7 @@ $foto_val = $dados_usuario['foto'] ?? '';
                                                 while ($stmtC->fetch()) {
                                                     $has_comments = true;
                                                     // Tratamento da foto do comentarista
-                                                    $c_foto_path = '../assets/img/padrao.jpg';
+                                                    $c_foto_path = '../assets/img/padrao.svg';
                                                     if (!empty($c_foto)) {
                                                         if (strpos($c_foto, 'uploads/') === 0) $c_foto_path = '../assets/' . $c_foto;
                                                         elseif (strpos($c_foto, 'assets_front') !== false || strpos($c_foto, 'http') === 0) $c_foto_path = $c_foto;
@@ -369,7 +372,7 @@ $foto_val = $dados_usuario['foto'] ?? '';
                                             ?>
                                                 <div class="flex gap-3 items-start">
                                                     <div class="w-8 h-8 rounded-full overflow-hidden shrink-0 border border-[#333]">
-                                                        <img src="<?php echo $c_foto_path; ?>" class="w-full h-full object-cover" onerror="this.src='../assets/img/padrao.jpg'">
+                                                        <img src="<?php echo $c_foto_path; ?>" class="w-full h-full object-cover" onerror="this.src='../assets/img/padrao.svg'">
                                                     </div>
                                                     <div class="flex-grow">
                                                         <div class="flex items-baseline gap-2">

@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128">
+  <!-- Fundo cinza -->
+  <circle cx="64" cy="64" r="64" fill="#3a3a3a"/>
+  <!-- Corpo/ombros -->
+  <ellipse cx="64" cy="115" rx="45" ry="35" fill="#6b6b6b"/>
+  <!-- Cabeça -->
+  <circle cx="64" cy="50" r="28" fill="#6b6b6b"/>
+</svg>

@@ -2,15 +2,15 @@
 session_start();
 require_once __DIR__ . '/../php/conexao.php';
 
-// Se não estiver logado, manda pro login
+// se não estiver logado, manda pro login
 if (!isset($_SESSION['id'])) {
     header('Location: login.php?erro=nao_autenticado');
     exit;
 }
 
-// Busca dados do usuário logado para exibir na interface (Front)
+// busca dados do usuário logado para exibir na interface (Front)
 $current_user = intval($_SESSION['id']);
-$sessionUserFoto = '../assets/img/padrao.jpg';
+$sessionUserFoto = '../assets/img/padrao.svg';
 $sessionUserName = 'Usuário';
 
 
@@ -24,9 +24,9 @@ if ($stmU) {
     if ($stmU->fetch()) {
         $sessionUserName = $u_nome ?? $sessionUserName;
         $sf = $u_foto ?? '';
-        // Lógica de caminho da foto
+        // lógica de caminho da foto
         if (empty($sf)) {
-            $sessionUserFoto = '../assets/img/padrao.jpg';
+            $sessionUserFoto = '../assets/img/padrao.svg';
         } elseif (strpos($sf, 'uploads/') === 0) {
             $sessionUserFoto = '../assets/' . $sf;
         } elseif (strpos($sf, 'assets_front') !== false || strpos($sf, 'http') === 0) {
@@ -129,7 +129,7 @@ if ($stmU) {
                     <!-- Cabeçalho do Card (Usuário) -->
                     <div class="flex items-center p-6 pb-2">
                         <div class="w-12 h-12 rounded-full overflow-hidden border-2 border-[#333] mr-4">
-                            <img id="criar-avatar" src="<?php echo htmlspecialchars($sessionUserFoto); ?>" alt="User Avatar" class="w-full h-full object-cover" onerror="this.onerror=null;this.src='../assets/img/padrao.jpg';">
+                            <img id="criar-avatar" src="<?php echo htmlspecialchars($sessionUserFoto); ?>" alt="User Avatar" class="w-full h-full object-cover" onerror="this.onerror=null;this.src='../assets/img/padrao.svg';">
                         </div>
                         <div>
                             <p id="criar-username" class="text-white font-semibold text-lg"><?php echo htmlspecialchars($sessionUserName); ?></p>

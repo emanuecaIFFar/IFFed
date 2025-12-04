@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>iffed - Página Inicial</title>
+    <title>IFeed - Página Inicial</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <!-- Tailwind (para estilos rápidos da nova sidebar) -->
@@ -19,15 +19,15 @@
             background-color: #000000; /* Garante fundo preto se o container não cobrir tudo */
         }
 
-        /* Principal da iffed */
-        .iffed-app-container {
+        /* Principal da IFeed */
+        .ifeed-app-container {
             display: flex; /*(sidebar + conteúdo) */
             min-height: 100vh; /* Altura mínima de 100% da viewport */
             background-color: #000000;
         }
 
         /* (Sidebar) */
-        .iffed-sidebar {
+        .ifeed-sidebar {
             width: 80px; /* largura encolhida */
             background-color: #000000;
             padding-top: 20px;
@@ -44,11 +44,11 @@
             transition: width 0.25s ease-in-out;
         }
 
-        .iffed-sidebar.expanded {
+        .ifeed-sidebar.expanded {
             width: 260px; /* largura quando expandida */
         }
 
-        .iffed-sidebar .nav-pills {
+        .ifeed-sidebar .nav-pills {
             width: 100%;
             display: flex;
             flex-direction: column;
@@ -56,11 +56,11 @@
             flex-grow: 1;
         }
 
-        .iffed-sidebar .nav-item {
+        .ifeed-sidebar .nav-item {
             width: 100%;
         }
 
-        .iffed-sidebar .nav-link {
+        .ifeed-sidebar .nav-link {
             color: #a8a8a8;
             font-size: 1.75rem;
             padding: 12px 0;
@@ -73,38 +73,38 @@
             margin-bottom: 10px;
         }
 
-        .iffed-sidebar .nav-link:hover {
+        .ifeed-sidebar .nav-link:hover {
             background-color: #181818;
             color: #ffffff;
         }
 
-        .iffed-sidebar .nav-link.active {
+        .ifeed-sidebar .nav-link.active {
             color: #ffffff;
             background-color: #202020;
         }
 
-        .iffed-sidebar .nav-item.iffed-menu-bottom {
+        .ifeed-sidebar .nav-item.ifeed-menu-bottom {
             margin-top: auto; /* Empurra o item "Menu" para o final */
         }
 
         /* Menu lateral expansível (usa os mesmos ícones da sidebar) */
-        .iffed-sidebar .nav-link span.label {
+        .ifeed-sidebar .nav-link span.label {
             display: none;
             margin-left: 8px;
             font-size: 0.95rem;
         }
 
-        .iffed-sidebar.expanded .nav-link {
+        .ifeed-sidebar.expanded .nav-link {
             justify-content: flex-start;
             padding-left: 18px;
             font-size: 1.2rem;
         }
 
-        .iffed-sidebar.expanded .nav-link span.label {
+        .ifeed-sidebar.expanded .nav-link span.label {
             display: inline;
         }
 
-        .iffed-main-view {
+        .ifeed-main-view {
             flex-grow: 1;
             margin-left: 80px; /* Espaço para a sidebar fixa encolhida */
             display: flex;
@@ -113,12 +113,12 @@
             transition: margin-left 0.25s ease-in-out;
         }
 
-        .iffed-sidebar.expanded ~ .iffed-main-view {
+        .ifeed-sidebar.expanded ~ .ifeed-main-view {
             margin-left: 260px; /* acompanha a sidebar expandida */
         }
 
         /* Barra superior */
-        .iffed-top-bar {
+        .ifeed-top-bar {
             background-color: #000000;
             color: #ffffff;
             height: 60px;
@@ -131,84 +131,84 @@
             z-index: 1020;
         }
 
-        .iffed-top-bar .page-title {
+        .ifeed-top-bar .page-title {
             font-size: 1.25rem;
             font-weight: 600;
             text-align: center;
             flex-grow: 1;
         }
 
-        .iffed-top-bar .btn-entrar {
+        .ifeed-top-bar .btn-entrar {
             font-size: 0.9rem;
             padding: 0.3rem 1rem;
             background-color: #efefef;
             color: #000000;
             border: none;
         }
-        .iffed-top-bar .btn-entrar:hover {
+        .ifeed-top-bar .btn-entrar:hover {
             background-color: #ffffff;
         }
-        .iffed-top-bar .spacer {
+        .ifeed-top-bar .spacer {
             min-width: 80px; /* Ajustar conforme o tamanho do botão "Entrar" para centralizar o título */
         }
 
         /* Área do feed de conteúdo */
-        .iffed-content-feed {
+        .ifeed-content-feed {
             padding: 20px;
             flex-grow: 1;
             color: #e0e0e0;
         }
 
         /* Estilização para os Cards (Substituindo .placeholder-post) */
-        .iffed-content-feed .card {
+        .ifeed-content-feed .card {
             background-color: #1c1c1c; /* Cor de fundo escura para o card */
             border: 1px solid #363636;  /* Borda sutil para o card */
             color: #e0e0e0; /* Cor do texto no card */
         }
 
-        .iffed-content-feed .card .card-header {
+        .ifeed-content-feed .card .card-header {
             background-color: #232323;
             border-bottom: 1px solid #363636;
             padding: 0.75rem 1rem;
         }
-         .iffed-content-feed .card .card-title {
+         .ifeed-content-feed .card .card-title {
             color: #e0e0e0;
         }
 
         /* Meta dos posts (handle, data) — mais contraste que o .text-muted padrão do Bootstrap */
-        .iffed-content-feed .card-header small.post-meta {
+        .ifeed-content-feed .card-header small.post-meta {
             color: #646464ff; /* mais claro que #888 */
             opacity: 0.95;
             font-weight: 500;
             font-size: 0. ninetyfiverem;
         }
 
-        .iffed-content-feed .card .card-img-top {
+        .ifeed-content-feed .card .card-img-top {
             border-radius: 0; /* Para remover arredondamento se o card header estiver presente */
              margin-top:0; /* Resetando margem da imagem original */
         }
-        .iffed-content-feed .card .card-body{
+        .ifeed-content-feed .card .card-body{
             padding: 1rem;
         }
-         .iffed-content-feed .card .card-text{
+         .ifeed-content-feed .card .card-text{
             color: #c0c0c0;
         }
 
 
-        .iffed-content-feed .card .card-footer.post-actions {
+        .ifeed-content-feed .card .card-footer.post-actions {
             background-color: #1c1c1c;
             border-top: 1px solid #363636;
             padding: 0.75rem 1rem;
         }
 
-        .iffed-content-feed .post-actions i {
+        .ifeed-content-feed .post-actions i {
             font-size: 1.35rem;
             color: #a8a8a8;
             margin-right: 18px;
             cursor: default; /* Indica que não é clicável */
         }
 
-        .iffed-content-feed .post-actions i:last-child {
+        .ifeed-content-feed .post-actions i:last-child {
             margin-right: 0;
         }
 
@@ -230,7 +230,7 @@
         #sidebar.expanded { width: 260px; }
 
         /* Ajustes visuais do cabeçalho de boas-vindas */
-        .iffed-content-feed h1.display-4 {
+        .ifeed-content-feed h1.display-4 {
             /* Garante uma fonte limpa e sem serifa igual da imagem */
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             
@@ -242,7 +242,7 @@
             letter-spacing: -0.5px; /* Aproxima levemente as letras para ficar moderno */
         }
 
-        .iffed-content-feed p.lead {
+        .ifeed-content-feed p.lead {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             
             font-size: 20px;    /* MUDANÇA: 14px é muito pequeno. Na foto o texto de apoio é maior. */
@@ -254,7 +254,7 @@
     </style>
 </head>
 <body>
-    <div class="iffed-app-container">
+    <div class="ifeed-app-container">
 
         <!-- Nova sidebar (substitui a antiga) -->
         <nav id="sidebar" class="fixed top-0 left-0 h-full bg-black border-r border-[#262626] z-50 flex flex-col justify-between py-5 transition-all duration-300 ease-in-out">
@@ -298,10 +298,10 @@
             </div>
         </nav>
 
-        <div id="main-content" class="iffed-main-view">
-            <header class="iffed-top-bar">
+        <div id="main-content" class="ifeed-main-view">
+            <header class="ifeed-top-bar">
                 <div class="spacer"></div> <h1 class="page-title mb-0">Página Inicial</h1>
-            </header> <main class="iffed-content-feed">
+            </header> <main class="ifeed-content-feed">
                 <h1 class="display-4">Bem-vindo ao IFeed!</h1>
                 <p class="lead">Do corredor direto para a sua timeline.</p>
 
@@ -320,7 +320,7 @@
 
                     if ($res = $conn->query($sql)) {
                         // Carrega dados do usuário atual para usar no input de comentário
-                        $sessionUserFoto = 'assets/img/padrao.jpg';
+                        $sessionUserFoto = 'assets/img/padrao.svg';
                         $sessionUserName = '';
                         if ($current_user) {
                             $stmU = $conn->prepare('SELECT nome, foto FROM perfil WHERE id = ? LIMIT 1');
@@ -331,9 +331,11 @@
                                 if ($stmU->fetch()) {
                                     $sessionUserName = $u_nome ?? '';
                                     $sf = $u_foto ?? '';
-                                    if (empty($sf)) {
-                                        $sessionUserFoto = 'assets/img/padrao.jpg';
+                                    if (empty($sf) || $sf === 'padrao.jpg' || $sf === 'img/padrao.jpg' || $sf === 'img/padrao.svg') {
+                                        $sessionUserFoto = 'assets/img/padrao.svg';
                                     } elseif (strpos($sf, 'uploads/') === 0) {
+                                        $sessionUserFoto = 'assets/' . $sf;
+                                    } elseif (strpos($sf, 'img/') === 0) {
                                         $sessionUserFoto = 'assets/' . $sf;
                                     } elseif (strpos($sf, 'assets_front') !== false || strpos($sf, 'http') === 0) {
                                         $sessionUserFoto = $sf;
@@ -350,10 +352,12 @@
                         while ($row = $res->fetch_assoc()) {
                             $autorNome = htmlspecialchars($row['nome'] ?? 'Usuário');
                             $foto = $row['foto'] ?? '';
-                            if (empty($foto)) {
-                                $autorFoto = 'assets/img/padrao.jpg';
+                            if (empty($foto) || $foto === 'padrao.jpg' || $foto === 'img/padrao.jpg' || $foto === 'img/padrao.svg') {
+                                $autorFoto = 'assets/img/padrao.svg';
                             } elseif (strpos($foto, 'uploads/') === 0) {
                                 $autorFoto = 'assets/' . $foto; // foto já guarda 'uploads/arquivo.jpg'
+                            } elseif (strpos($foto, 'img/') === 0) {
+                                $autorFoto = 'assets/' . $foto; // foto padrão em 'img/padrao.jpg'
                             } elseif (strpos($foto, 'assets_front') !== false || strpos($foto, 'http') === 0) {
                                 $autorFoto = $foto;
                             } else {
@@ -371,7 +375,7 @@
                         <div class="card h-100">
                             <div class="card-header d-flex align-items-center">
                                     <div class="me-3" style="width:44px; height:44px; overflow:hidden; border-radius:50%;">
-                                    <img src="<?php echo $autorFoto; ?>" alt="Avatar" style="width:100%; height:100%; object-fit:cover;" onerror="this.onerror=null;this.src='assets/img/padrao.jpg';">
+                                    <img src="<?php echo $autorFoto; ?>" alt="Avatar" style="width:100%; height:100%; object-fit:cover;" onerror="this.onerror=null;this.src='assets/img/padrao.svg';">
                                 </div>
                                 <div class="flex-grow-1">
                                     <div class="card-title mb-0"><?php echo $autorNome; ?></div>
@@ -420,7 +424,7 @@
                                             $stmC->bind_result($c_conteudo, $c_data, $c_nome, $c_foto);
                                             while ($stmC->fetch()) {
                                                 $c_autor = htmlspecialchars($c_nome ?? 'Usuário');
-                                                $c_foto_path = 'assets/img/padrao.jpg';
+                                                $c_foto_path = 'assets/img/padrao.svg';
                                                 if (!empty($c_foto)) {
                                                     if (strpos($c_foto, 'uploads/') === 0) $c_foto_path = 'assets/' . $c_foto;
                                                     elseif (strpos($c_foto, 'assets_front') !== false || strpos($c_foto, 'http') === 0) $c_foto_path = $c_foto;
@@ -429,7 +433,7 @@
                                                 $c_text = nl2br(htmlspecialchars($c_conteudo));
                                                 $c_time = date('d/m/Y H:i', strtotime($c_data));
                                                 echo '<div class="d-flex align-items-start mb-2">';
-                                                echo '<div style="width:36px;height:36px;border-radius:50%;overflow:hidden;margin-right:8px;flex:0 0 36px;"><img src="' . $c_foto_path . '" alt="avatar" style="width:100%;height:100%;object-fit:cover;" onerror="this.src=\'assets/img/padrao.jpg\'"></div>';
+                                                echo '<div style="width:36px;height:36px;border-radius:50%;overflow:hidden;margin-right:8px;flex:0 0 36px;"><img src="' . $c_foto_path . '" alt="avatar" style="width:100%;height:100%;object-fit:cover;" onerror="this.src=\'assets/img/padrao.svg\'"></div>';
                                                 echo '<div style="flex:1;"><div style="font-size:0.95rem;color:#eaeaea;font-weight:600;">' . $c_autor . ' <small style="color:#9a9a9a;font-weight:400;margin-left:6px;font-size:0.85rem;">' . $c_time . '</small></div><div style="color:#d1d1d1;font-size:0.95rem;">' . $c_text . '</div></div>';
                                                 echo '</div>';
                                             }
@@ -446,7 +450,7 @@
                                         <input type="hidden" name="id_postagem" value="<?php echo $row['id']; ?>">
                                         <input type="hidden" name="redirect_to" value="<?php echo htmlspecialchars($_SERVER['PHP_SELF'] . '?open_comments=' . $row['id'] . '#comments-panel-' . $row['id']); ?>">
                                         <div style="width:40px;height:40px;overflow:hidden;border-radius:50%;margin-right:8px;flex:0 0 40px;">
-                                            <img src="<?php echo $sessionUserFoto; ?>" alt="sua foto" style="width:100%;height:100%;object-fit:cover;" onerror="this.src='assets/img/padrao.jpg'">
+                                            <img src="<?php echo $sessionUserFoto; ?>" alt="sua foto" style="width:100%;height:100%;object-fit:cover;" onerror="this.src='assets/img/padrao.svg'">
                                         </div>
                                         <div style="flex:1;display:flex;gap:8px;">
                                             <input name="conteudo" type="text" class="form-control form-control-sm" placeholder="Adicione um comentário..." />
