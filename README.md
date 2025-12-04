@@ -1,4 +1,16 @@
-# IFeed - Rede Social
+# IFFed - Rede Social
+
+**Status:** Em desenvolvimento 🚧
+
+## Sobre o projeto
+
+Este projeto é uma Rede Social Escolar desenvolvida como atividade prática para a disciplina de Desenvolvimento Web. O objetivo é integrar Front-end e Back-end usando PHP e MySQL, cobrindo autenticação, upload de arquivos, sessões e exibição de perfis.
+
+Principais conceitos usados:
+
+- Conexão com banco de dados MySQL
+- Autenticação (Login / Logout)
+# IFFed - Rede Social
 
 **Status:** Em desenvolvimento 🚧
 
