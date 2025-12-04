@@ -270,12 +270,144 @@ if (empty($foto_val) || $foto_val === 'padrao.jpg' || $foto_val === 'img/padrao.
                 <!-- Rodapé do Card -->
                 <div class="border-t border-[#333] p-6 bg-[#1c1c1c] flex justify-end items-center gap-4">
                     <a href="../index.php" class="px-6 py-2.5 text-sm font-medium text-gray-400 hover:text-white transition-colors">Cancelar</a>
-                    <a href="#" id="editarPerfilBtn" class="px-6 py-2.5 text-sm font-bold bg-white text-black rounded-lg hover:bg-gray-200 transition-all shadow-[0_0_15px_rgba(255,255,255,0.1)]">Editar Perfil</a>
+                    <button type="button" id="editarPerfilBtn" class="px-6 py-2.5 text-sm font-bold bg-white text-black rounded-lg hover:bg-gray-200 transition-all shadow-[0_0_15px_rgba(255,255,255,0.1)]">Editar Perfil</button>
                 </div>
             </div>
 
         </main>
     </div>
+
+    <!-- ================= MODAL DE EDIÇÃO ================= -->
+    <div id="modalEditar" class="fixed inset-0 bg-black/80 z-[100] hidden items-center justify-center p-4">
+        <div class="bg-[#1E1E1E] border border-[#333] rounded-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
+            <!-- Header do Modal -->
+            <div class="flex justify-between items-center p-5 border-b border-[#333] sticky top-0 bg-[#1E1E1E] z-10">
+                <h2 class="text-lg font-semibold text-white">Editar Perfil</h2>
+                <button type="button" id="fecharModal" class="text-gray-400 hover:text-white transition-colors">
+                    <i data-lucide="x" class="w-6 h-6"></i>
+                </button>
+            </div>
+            
+            <!-- Formulário -->
+            <form action="../php/atualizar_perfil.php" method="POST" enctype="multipart/form-data" class="p-5 space-y-5">
+                
+                <!-- Foto de Perfil -->
+                <div class="flex flex-col items-center space-y-3">
+                    <div class="relative group">
+                        <div class="w-28 h-28 rounded-full overflow-hidden border-2 border-[#333] bg-black">
+                            <img id="previewFoto" src="<?php echo $foto_path; ?>" alt="Avatar" class="w-full h-full object-cover" onerror="this.src='../assets/img/padrao.svg';">
+                        </div>
+                        <label for="inputFoto" class="absolute bottom-0 right-0 bg-[#333] hover:bg-[#444] text-white p-2 rounded-full border border-black cursor-pointer transition-colors">
+                            <i data-lucide="camera" class="w-4 h-4"></i>
+                        </label>
+                    </div>
+                    <input type="file" id="inputFoto" name="foto" accept="image/jpeg,image/png,image/gif,image/webp" class="hidden">
+                    <p class="text-xs text-gray-500">JPG, PNG, GIF ou WebP (máx. 5MB)</p>
+                </div>
+
+                <!-- Nome -->
+                <div class="space-y-2">
+                    <label for="inputNome" class="flex items-center text-xs font-bold text-gray-500 uppercase tracking-widest gap-2">
+                        <i data-lucide="user" class="w-3.5 h-3.5"></i>
+                        Nome Completo
+                    </label>
+                    <input 
+                        type="text" 
+                        id="inputNome" 
+                        name="nome" 
+                        value="<?php echo htmlspecialchars($dados_usuario['nome'] ?? ''); ?>"
+                        required
+                        class="w-full bg-black/40 border border-[#333] rounded-lg px-4 py-3 text-white focus:outline-none focus:border-[#555] transition-colors"
+                        placeholder="Seu nome completo"
+                    >
+                </div>
+
+                <!-- Email -->
+                <div class="space-y-2">
+                    <label for="inputEmail" class="flex items-center text-xs font-bold text-gray-500 uppercase tracking-widest gap-2">
+                        <i data-lucide="mail" class="w-3.5 h-3.5"></i>
+                        E-mail
+                    </label>
+                    <input 
+                        type="email" 
+                        id="inputEmail" 
+                        name="email" 
+                        value="<?php echo htmlspecialchars($dados_usuario['email'] ?? ''); ?>"
+                        required
+                        class="w-full bg-black/40 border border-[#333] rounded-lg px-4 py-3 text-white focus:outline-none focus:border-[#555] transition-colors"
+                        placeholder="seu@email.com"
+                    >
+                </div>
+
+                <!-- Data de Nascimento -->
+                <div class="space-y-2">
+                    <label for="inputDataNasc" class="flex items-center text-xs font-bold text-gray-500 uppercase tracking-widest gap-2">
+                        <i data-lucide="calendar" class="w-3.5 h-3.5"></i>
+                        Data de Nascimento
+                    </label>
+                    <input 
+                        type="date" 
+                        id="inputDataNasc" 
+                        name="data_nasc" 
+                        value="<?php echo htmlspecialchars($dados_usuario['data_nasc'] ?? ''); ?>"
+                        class="w-full bg-black/40 border border-[#333] rounded-lg px-4 py-3 text-white focus:outline-none focus:border-[#555] transition-colors"
+                    >
+                </div>
+
+                <!-- Biografia -->
+                <div class="space-y-2">
+                    <label for="inputBio" class="flex items-center text-xs font-bold text-gray-500 uppercase tracking-widest gap-2">
+                        <i data-lucide="file-text" class="w-3.5 h-3.5"></i>
+                        Biografia
+                    </label>
+                    <textarea 
+                        id="inputBio" 
+                        name="bio" 
+                        rows="4"
+                        class="w-full bg-black/40 border border-[#333] rounded-lg px-4 py-3 text-white focus:outline-none focus:border-[#555] transition-colors resize-none"
+                        placeholder="Conte um pouco sobre você..."
+                    ><?php echo htmlspecialchars($dados_usuario['bio'] ?? ''); ?></textarea>
+                </div>
+
+                <!-- Botões -->
+                <div class="flex gap-3 pt-2">
+                    <button type="button" id="cancelarModal" class="flex-1 px-4 py-3 text-sm font-medium text-gray-400 hover:text-white border border-[#333] rounded-lg transition-colors">
+                        Cancelar
+                    </button>
+                    <button type="submit" class="flex-1 px-4 py-3 text-sm font-bold bg-white text-black rounded-lg hover:bg-gray-200 transition-colors">
+                        Salvar Alterações
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Mensagens de Feedback -->
+    <?php if (isset($_GET['sucesso'])): ?>
+    <div id="msgSucesso" class="fixed top-20 right-6 bg-green-600 text-white px-5 py-3 rounded-lg shadow-lg z-[200] animate-pulse">
+        ✓ Perfil atualizado com sucesso!
+    </div>
+    <script>setTimeout(() => document.getElementById('msgSucesso')?.remove(), 3000);</script>
+    <?php endif; ?>
+
+    <?php if (isset($_GET['erro'])): ?>
+    <div id="msgErro" class="fixed top-20 right-6 bg-red-600 text-white px-5 py-3 rounded-lg shadow-lg z-[200]">
+        <?php 
+        $erros = [
+            'campos_obrigatorios' => '⚠ Nome e email são obrigatórios',
+            'email_invalido' => '⚠ Formato de email inválido',
+            'email_existente' => '⚠ Este email já está em uso',
+            'arquivo_invalido' => '⚠ Arquivo enviado não é uma imagem válida',
+            'tipo_nao_permitido' => '⚠ Tipo de imagem não permitido',
+            'arquivo_grande' => '⚠ Imagem muito grande (máx. 5MB)',
+            'falha_upload' => '⚠ Erro ao salvar imagem',
+            'falha_banco' => '⚠ Erro ao atualizar perfil'
+        ];
+        echo $erros[$_GET['erro']] ?? '⚠ Ocorreu um erro';
+        ?>
+    </div>
+    <script>setTimeout(() => document.getElementById('msgErro')?.remove(), 4000);</script>
+    <?php endif; ?>
 
         <!-- Lista de postagens do usuário logado -->
         <div class="p-6 md:p-10">
@@ -447,53 +579,92 @@ if (empty($foto_val) || $foto_val === 'padrao.jpg' || $foto_val === 'img/padrao.
                 }
             });
         }
-    </script>
-    <style>
-        /* Balão de 'Em desenvolvimento' */
-        .dev-bubble {
-            position: fixed;
-            top: 84px;
-            right: 24px;
-            background: rgba(255,255,255,0.06);
-            color: #fff;
-            padding: 10px 14px;
-            border-radius: 10px;
-            box-shadow: 0 8px 30px rgba(0,0,0,0.6);
-            font-size: 0.95rem;
-            opacity: 0;
-            transform: translateY(-6px);
-            transition: opacity 220ms ease, transform 220ms ease;
-            pointer-events: none;
-            z-index: 9999;
-        }
-        .dev-bubble.show {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    </style>
 
-    <script>
-        // Mostrar balão "Em desenvolvimento" ao clicar em Editar Perfil
-        (function(){
-            var btn = document.getElementById('editarPerfilBtn');
-            if(!btn) return;
-            btn.addEventListener('click', function(e){
-                e.preventDefault();
-                var bubble = document.getElementById('devBubble');
-                if(!bubble){
-                    bubble = document.createElement('div');
-                    bubble.id = 'devBubble';
-                    bubble.className = 'dev-bubble';
-                    bubble.textContent = 'Em desenvolvimento...';
-                    document.body.appendChild(bubble);
-                }
-                bubble.classList.add('show');
-                if(window._devBubbleTimeout) clearTimeout(window._devBubbleTimeout);
-                window._devBubbleTimeout = setTimeout(function(){
-                    bubble.classList.remove('show');
-                }, 2300);
+        // 3. Lógica do Modal de Edição
+        const modalEditar = document.getElementById('modalEditar');
+        const editarPerfilBtn = document.getElementById('editarPerfilBtn');
+        const fecharModal = document.getElementById('fecharModal');
+        const cancelarModal = document.getElementById('cancelarModal');
+        const inputFoto = document.getElementById('inputFoto');
+        const previewFoto = document.getElementById('previewFoto');
+
+        // Abrir modal
+        if (editarPerfilBtn && modalEditar) {
+            editarPerfilBtn.addEventListener('click', () => {
+                modalEditar.classList.remove('hidden');
+                modalEditar.classList.add('flex');
+                document.body.style.overflow = 'hidden'; // Trava scroll da página
+                // Re-renderiza ícones do Lucide no modal
+                if (window.lucide) lucide.createIcons();
             });
-        })();
+        }
+
+        // Fechar modal (botão X)
+        if (fecharModal) {
+            fecharModal.addEventListener('click', () => {
+                modalEditar.classList.add('hidden');
+                modalEditar.classList.remove('flex');
+                document.body.style.overflow = ''; // Libera scroll
+            });
+        }
+
+        // Fechar modal (botão Cancelar)
+        if (cancelarModal) {
+            cancelarModal.addEventListener('click', () => {
+                modalEditar.classList.add('hidden');
+                modalEditar.classList.remove('flex');
+                document.body.style.overflow = '';
+            });
+        }
+
+        // Fechar modal clicando fora
+        if (modalEditar) {
+            modalEditar.addEventListener('click', (e) => {
+                if (e.target === modalEditar) {
+                    modalEditar.classList.add('hidden');
+                    modalEditar.classList.remove('flex');
+                    document.body.style.overflow = '';
+                }
+            });
+        }
+
+        // Preview da foto ao selecionar arquivo
+        if (inputFoto && previewFoto) {
+            inputFoto.addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (file) {
+                    // Validar tipo
+                    const tiposPermitidos = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+                    if (!tiposPermitidos.includes(file.type)) {
+                        alert('Tipo de arquivo não permitido. Use JPG, PNG, GIF ou WebP.');
+                        inputFoto.value = '';
+                        return;
+                    }
+                    // Validar tamanho (5MB)
+                    if (file.size > 5 * 1024 * 1024) {
+                        alert('Arquivo muito grande. Máximo: 5MB');
+                        inputFoto.value = '';
+                        return;
+                    }
+                    // Mostrar preview
+                    const reader = new FileReader();
+                    reader.onload = (ev) => {
+                        previewFoto.src = ev.target.result;
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+        }
+
+        // Fechar modal com tecla ESC
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && modalEditar && !modalEditar.classList.contains('hidden')) {
+                modalEditar.classList.add('hidden');
+                modalEditar.classList.remove('flex');
+                document.body.style.overflow = '';
+            }
+        });
     </script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
 </body>
 </html>
